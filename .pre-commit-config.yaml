@@ -1,0 +1,41 @@
+files: ^aerographer/
+repos:
+  - repo: https://github.com/psf/black
+    rev: stable
+    hooks:
+      - id: black
+        args: [--skip-string-normalization]
+        entry: black
+        language: python
+        types: [python]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: "v0.961"
+    hooks:
+      - id: mypy
+        args: [--no-strict-optional]
+        # exclude: (?x)( \.pyi$ )
+        entry: mypy
+        language: python
+        types: [python]
+  - repo: https://github.com/PyCQA/bandit
+    rev: "1.7.4"
+    hooks:
+      - id: bandit
+        name: bandit
+        description: "Bandit is a tool for finding common security issues in Python code"
+        entry: bandit
+        language: python
+        language_version: python3
+        types: [python]
+  - repo: https://github.com/PyCQA/pydocstyle
+    rev: "6.1.1"
+    hooks:
+      - id: pydocstyle
+        name: pydocstyle
+        description: pydocstyle is a static analysis tool for checking compliance with Python docstring conventions.\
+        args:
+          - --add-ignore=D202,D105,D107
+          - --convention=google
+        entry: pydocstyle
+        language: python
+        types: [python]

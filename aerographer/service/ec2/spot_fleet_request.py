@@ -1,0 +1,1 @@
+"""spot fleet request resource."""

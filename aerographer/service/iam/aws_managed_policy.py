@@ -1,0 +1,1 @@
+"""aws managed policy resource."""

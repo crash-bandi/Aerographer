@@ -1,0 +1,13 @@
+"""Type stub file"""
+
+from typing import Any, Callable
+from dataclasses import dataclass
+
+@dataclass(slots=True, frozen=True)
+class Result:
+    message: str = ...
+    status: bool = ...
+
+def evaluation(
+    service: str, resource: str, includes: list[str] | None = ...
+) -> Callable[..., Any]: ...

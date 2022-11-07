@@ -1,0 +1,1 @@
+"""cache_cluster resource."""

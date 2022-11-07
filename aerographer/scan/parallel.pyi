@@ -1,0 +1,13 @@
+"""Type stub file"""
+
+from typing import Any, Awaitable, Callable, Iterable
+
+async def asyncify(func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any: ...
+async def async_scan(cls: Any) -> Awaitable[Any]: ...
+async def async_paginate(
+    paginator: Any,
+    id_key: str | None = ...,
+    id_values: Iterable[Any] | None = ...,
+    **kwargs: Any
+) -> tuple[list[dict[str, Any]], ...]: ...
+def _resolve_pages(page_iterator: Iterable[Any]) -> list[dict[str, Any]]: ...

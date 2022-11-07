@@ -1,0 +1,119 @@
+"""kms service.
+
+Contains any customer paginators for service.
+"""
+
+from typing import Any
+from aerographer.scan import SURVEY
+from aerographer.scan.parallel import async_paginate
+from aerographer.crawler import get_crawlers, deploy_crawlers
+from aerographer.crawler.generic import GenericCustomPaginator
+
+
+class KeyPaginator(GenericCustomPaginator):
+    """Paginator for KeyMetadata resource.
+
+    Custom paginator used to retrieve resource information from AWS.
+
+    Attributes:
+        INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+        context (CONTEXT): Which context to use for retrieving data.
+        paginate_func_name (str): Name of the boto3 function used to retrieve data.
+
+    Methods:
+        paginate(**kwargs): Retrieve data.
+    """
+
+    INCLUDE = ['kms.key_id']
+
+    async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
+        """Retrieves pages of resource data.
+
+        Retrieves list of pages for resource data.
+
+        Args:
+           **kwargs: any arguements supported by function provided through paginate_func_name
+
+        Returns:
+           An iterable object. Iterating over this object will yield a single page of a
+           response at a time.
+        """
+
+        await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        keys: list[str] = [
+            i.id for i in SURVEY['kms']['key_id'].values() if i.context == self.context
+        ]
+
+        ## return a single page with multiple results
+        pages: list[dict[str, Any]] = []
+        page: dict[str, list[dict[str, str]]] = {'KeyMetadata': []}
+
+        for results in await async_paginate(
+            self.paginator, id_key='KeyId', id_values=keys, **kwargs
+        ):
+            for result in results:
+                page['KeyMetadata'].append(result['KeyMetadata'])
+        pages.append(page)
+
+        return tuple(pages)
+
+
+class KeyRotationPaginator(GenericCustomPaginator):
+    """Paginator for KeyRotation resource.
+
+    Custom paginator used to retrieve resource information from AWS.
+
+    Attributes:
+       INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+       context (CONTEXT): Which context to use for retrieving data.
+       paginate_func_name (str): Name of the boto3 function used to retrieve data.
+
+    Methods:
+       paginate(**kwargs): Retrieve data.
+    """
+
+    INCLUDE = ['kms.key']
+
+    async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
+        """Retrieves pages of resource data.
+
+        Retrieves list of pages for resource data.
+
+        Args:
+           **kwargs: any arguements supported by function provided through paginate_func_name
+
+        Returns:
+           An iterable object. Iterating over this object will yield a single page of a
+           response at a time.
+        """
+
+        await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        keys: list[str] = [
+            i.id
+            for i in SURVEY['kms']['key'].values()
+            if i.context == self.context
+            and i.data.KeyManager == 'CUSTOMER'  # type:ignore
+            and i.data.Origin == 'AWS_KMS'  # type:ignore
+        ]
+
+        ## return a single page with multiple results
+        pages: list[dict[str, Any]] = []
+        page: dict[str, list[dict[str, str]]] = {"KeyRotation": []}
+
+        pager_results = dict(
+            zip(
+                keys,
+                await async_paginate(
+                    self.paginator, id_key='KeyId', id_values=keys, **kwargs
+                ),
+            )
+        )
+
+        for key, results in pager_results.items():
+            for result in results:
+                page["KeyRotation"].append(
+                    {'KeyId': key, 'KeyRotationEnabled': result['KeyRotationEnabled']}
+                )
+        pages.append(page)
+
+        return tuple(pages)
