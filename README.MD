@@ -7,6 +7,8 @@
         <img src="https://github.com/crash-bandi/Aerographer/workflows/Tests/badge.svg?branch=release%2Fv1.2.4">
     <a href="https://github.com/crash-bandi/Aerographer/actions">
         <img src="https://img.shields.io/badge/coverage-17%25-red" /></a>
+    <a href="https://www.apache.org/licenses/LICENSE-2.0.txt">
+        <img src="http://img.shields.io/pypi/l/boto3.svg?style=flat" /></a>
 </p>
 
 Aerographer is a python utility for collecting and analysing information about cloud resources. It can be used as an imported python module, or evoked directly from a command line interface. While there are many options for collecting information from cloud platform, areographer provides a unique way to build custom analysis actions to run the collected information through. A simple decorator can be used on any external function that the module will automatically find and apply to the specified cloud resource data. This creates an simple way to collect and process data without the need to build the complex mechanisms required for the actual data retrieval process. The module takes care of the dynamic creation and execution of cloud crawlers, all you need to do is write the functions to act on the data.
@@ -445,3 +447,10 @@ https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
 - route53.hosted_zone
 - route53.record_set
 - ssm.parameter
+
+        
+More Resources
+--------------
+
+* `NOTICE <https://github.com/crash-bandi/Aerographer/blob/main/NOTICE>`__
+* `License <https://github.com/crash-bandi/Aerographer/blob/main/LICENSE>`__
