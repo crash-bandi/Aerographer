@@ -452,5 +452,5 @@ https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
 More Resources
 --------------
 
-* `NOTICE <https://github.com/crash-bandi/Aerographer/blob/main/NOTICE>`__
-* `License <https://github.com/crash-bandi/Aerographer/blob/main/LICENSE>`__
+* [NOTICE](https://github.com/crash-bandi/Aerographer/blob/main/NOTICE)
+* [License](https://github.com/crash-bandi/Aerographer/blob/main/LICENSE)
