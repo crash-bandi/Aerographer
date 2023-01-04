@@ -11,7 +11,7 @@ for file in $(git diff --diff-filter=du --name-only --cached); do
         full_path="$(git rev-parse --show-toplevel)/$file"
 
         # Check for Copyright statement
-        if ! head -2 $full_path | grep -q "Copyright $year"; then
+        if ! head -1 $full_path | grep -q "Copyright $year"; then
             files_without_header+=($file)
         fi
     fi
