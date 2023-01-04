@@ -428,16 +428,16 @@ class GenericCrawler:
         cls.state = 'complete'
         logger.info('Scan of %s:%s complete.', cls.serviceType, cls.resourceName)
 
-    def as_json(self) -> str:
-        """Return crawler data as json string.
+    def asdict(self) -> dict:
+        """Return crawler data as dictionary.
 
-        Returns json string representation of crawler instance.
+        Returns dictionary representation of crawler instance.
 
         Returns:
-            JSON string of attributes.
+            Dictionary of attributes.
         """
 
-        json_data = {
+        data = {
             'id': self.id,
             'iac_id': self.iac_id,
             'service': self.serviceType,
@@ -452,7 +452,18 @@ class GenericCrawler:
             'data': asdict(self.data),
         }
 
-        return json.dumps(json_data, default=str)
+        return data
+
+    def asjson(self) -> str:
+        """Return crawler data as json string.
+
+        Returns json string representation of crawler instance.
+
+        Returns:
+            JSON string of attributes.
+        """
+
+        return json.dumps(self.asdict(), default=str)
 
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, GenericCrawler):
