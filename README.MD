@@ -1,10 +1,10 @@
 <p align="left">
     <a href="https://www.python.org/downloads/release/python-3100/">
-        <img src="https://img.shields.io/badge/python-3.10-blue.svg" /></a>
+        <img src="https://img.shields.io/badge/python-3.10+-blue.svg" /></a>
     <a href="https://github.com/crash-bandi/Aerographer/releases">
-        <img src="https://img.shields.io/badge/version-1.2.4-blue" /></a>
+        <img src="https://img.shields.io/badge/version-0.0.1-blue" /></a>
     <a href="https://github.com/crash-bandi/Aerographer/actions">
-        <img src="https://github.com/crash-bandi/Aerographer/workflows/Tests/badge.svg?branch=release%2Fv1.2.4">
+        <img src="https://github.com/crash-bandi/Aerographer/workflows/Tests/badge.svg?branch=release%2Fv0.0.1">
     <a href="https://github.com/crash-bandi/Aerographer/actions">
         <img src="https://img.shields.io/badge/coverage-17%25-red" /></a>
     <a href="https://www.apache.org/licenses/LICENSE-2.0.txt">
