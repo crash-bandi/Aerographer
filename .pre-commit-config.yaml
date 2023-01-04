@@ -1,5 +1,12 @@
 files: ^aerographer/
 repos:
+  - repo: local
+    hooks:
+      - id: license_validation
+        name: license_validation
+        entry: .pre-commit-hooks/license-header.sh
+        language: script
+        pass_filenames: false
   - repo: https://github.com/psf/black
     rev: stable
     hooks:
@@ -34,7 +41,7 @@ repos:
         name: pydocstyle
         description: pydocstyle is a static analysis tool for checking compliance with Python docstring conventions.\
         args:
-          - --add-ignore=D202,D105,D107
+          - --add-ignore=D202,D105,D107,D210
           - --convention=google
         entry: pydocstyle
         language: python
