@@ -55,8 +55,9 @@ NEW_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
 echo "New Version: $NEW_VERSION"
 
 # update files with new version
-sed -i "s/version='$CURRENT_VERSION'/version='$NEW_VERSION'/g" setup.py
-sed -i "s/version-$CURRENT_VERSION-blue/version-$NEW_VERSION-blue/g" README.MD
+sed -i "" "s/$CURRENT_VERSION/$NEW_VERSION/g" aerographer/__init__.py
+sed -i "" "s/version='$CURRENT_VERSION'/version='$NEW_VERSION'/g" setup.py
+sed -i "" "s/version-$CURRENT_VERSION-blue/version-$NEW_VERSION-blue/g" README.MD
 
 # push changes
 git add setup.py README.MD
