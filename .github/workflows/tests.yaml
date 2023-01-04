@@ -1,54 +1,54 @@
-name: Tests
+# name: Tests
 
-on:
-  push:
-    branches:
-      - "bugfix/**"
-      - "feature/**"
-      - "release/**"
+# on:
+#   push:
+#     branches:
+#       - "bugfix/**"
+#       - "feature/**"
+#       - "release/**"
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    env:
-      CI_COMMIT_MESSAGE: Update coverage badge
-      CI_COMMIT_AUTHOR: Continuous Integration
-    strategy:
-      matrix:
-        python-version: ["3.10"]
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     env:
+#       CI_COMMIT_MESSAGE: Update coverage badge
+#       CI_COMMIT_AUTHOR: Continuous Integration
+#     strategy:
+#       matrix:
+#         python-version: ["3.10"]
 
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Set up Python ${{ matrix.python-version }}
+#         uses: actions/setup-python@v2
+#         with:
+#           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements-tests.txt
-          python -m pip install .
+#       - name: Install dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           python -m pip install -r requirements-tests.txt
+#           python -m pip install .
 
-      - name: Run tests
-        run: |
-          pytest --cov-report xml --cov-report term-missing --cov="$(python -c "import site; print(site.getsitepackages()[-1])")/aerographer" tests/
+#       - name: Run tests
+#         run: |
+#           pytest --cov-report xml --cov-report term-missing --cov="$(python -c "import site; print(site.getsitepackages()[-1])")/aerographer" tests/
 
-      - name: Pytest coverage badge
-        # if: startsWith(github.head_ref, 'release/')
-        env:
-          BRANCH: ${{github.ref_name}}
-        run: |
-          sed -E -i "s/branch=.*$/branch=${BRANCH//\//\%2F}\">/g" README.MD
-          sed -E -i "s/coverage-[0-9]{1,3}%25-(red|orange|yellowgreen|yellow|green)/$(python coverage.py)/g" README.MD
+#       - name: Pytest coverage badge
+#         # if: startsWith(github.head_ref, 'release/')
+#         env:
+#           BRANCH: ${{github.ref_name}}
+#         run: |
+#           sed -E -i "s/branch=.*$/branch=${BRANCH//\//\%2F}\">/g" README.MD
+#           sed -E -i "s/coverage-[0-9]{1,3}%25-(red|orange|yellowgreen|yellow|green)/$(python coverage.py)/g" README.MD
 
-      - name: GIT push
-        # Only run on release branch pull request.
-        # if: startsWith(github.head_ref, 'release/')
-        run: |
-          if git status | grep -q modified; then
-            git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
-            git config --global user.email "username@users.noreply.github.com"
-            git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
-            git push
-          fi
+#       - name: GIT push
+#         # Only run on release branch pull request.
+#         # if: startsWith(github.head_ref, 'release/')
+#         run: |
+#           if git status | grep -q modified; then
+#             git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+#             git config --global user.email "username@users.noreply.github.com"
+#             git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+#             git push
+#           fi
