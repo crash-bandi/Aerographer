@@ -2509,5 +2509,105 @@
                 }
             }
         }
+    },
+    "lambda": {
+        "function" :{
+            "resourceType": "Functions",
+            "idAttribute": "FunctionName",
+            "paginator": "list_functions",
+            "scanParameters": {},
+            "responseSchema": {
+                "FunctionName": "string",
+                "FunctionArn": "string",
+                "Runtime": "string",
+                "Role": "string",
+                "Handler": "string",
+                "CodeSize": 123,
+                "Description": "string",
+                "Timeout": 123,
+                "MemorySize": 123,
+                "LastModified": "string",
+                "CodeSha256": "string",
+                "Version": "string",
+                "VpcConfig": {
+                    "SubnetIds": [
+                        "string"
+                    ],
+                    "SecurityGroupIds": [
+                        "string"
+                    ],
+                    "VpcId": "string"
+                },
+                "DeadLetterConfig": {
+                    "TargetArn": "string"
+                },
+                "Environment": {
+                    "Variables": [
+                        {
+                            "key":"string",
+                            "value": "string"
+                        }
+                    ],
+                    "Error": {
+                        "ErrorCode": "string",
+                        "Message": "string"
+                    }
+                },
+                "KMSKeyArn": "string",
+                "TracingConfig": {
+                    "Mode": "string"
+                },
+                "MasterArn": "string",
+                "RevisionId": "string",
+                "Layers": [
+                    {
+                        "Arn": "string",
+                        "CodeSize": 123,
+                        "SigningProfileVersionArn": "string",
+                        "SigningJobArn": "string"
+                    }
+                ],
+                "State": "string",
+                "StateReason": "string",
+                "StateReasonCode": "string",
+                "LastUpdateStatus": "string",
+                "LastUpdateStatusReason": "string",
+                "LastUpdateStatusReasonCode": "string",
+                "FileSystemConfigs": [
+                    {
+                        "Arn": "string",
+                        "LocalMountPath": "string"
+                    }
+                ],
+                "PackageType": "string",
+                "ImageConfigResponse": {
+                    "ImageConfig": {
+                        "EntryPoint": [
+                            "string"
+                        ],
+                        "Command": [
+                            "string"
+                        ],
+                        "WorkingDirectory": "string"
+                    },
+                    "Error": {
+                        "ErrorCode": "string",
+                        "Message": "string"
+                    }
+                },
+                "SigningProfileVersionArn": "string",
+                "SigningJobArn": "string",
+                "Architectures": [
+                    "string"
+                ],
+                "EphemeralStorage": {
+                    "Size": 123
+                },
+                "SnapStart": {
+                    "ApplyOn": "string",
+                    "OptimizationStatus": "string"
+                }
+            }
+        }
     }
 }

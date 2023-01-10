@@ -444,6 +444,7 @@ https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
 - kms.key_metadata
 - kms.key_rotation
 - kms.key
+- lambda.function
 - route53.hosted_zone
 - route53.record_set
 - ssm.parameter
