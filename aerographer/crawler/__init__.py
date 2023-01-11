@@ -649,6 +649,7 @@ class Crawler:
         skip (str|list[str]): (optional) Service(s) to skip. Default: []
         profiles (list[str]): (optional) AWS profile(s) for accounts to scan. Default ['default'].
         regions (list[str]): (optional) AWS region(s) to scan. Default ['us-east-1'].
+        role (str): (optional) AWS role name to assume in each account.
         evaluations (list[str]): (optional) Module containing evalution functions to run.
         crawlers (GenericCrawler): (class attribute) Collection of web crawlers to use.
 

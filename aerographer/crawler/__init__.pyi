@@ -37,6 +37,7 @@ class Crawler:
         skip: str | list[str] | None = ...,
         profiles: str | list[str | None] = ...,
         regions: str | list[str | None] = ...,
+        role: str | None = ...,
         evaluations: list[str] | None = ...,
     ) -> None: ...
     def _apply_external_evaluations(self) -> None: ...
