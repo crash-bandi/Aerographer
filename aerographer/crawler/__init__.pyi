@@ -25,8 +25,8 @@ class Crawler:
     services: str | list[str]
     skip: str | list[str] | None
     profiles: list[str] | None
+    roles: list[str] | None
     regions: list[str] | None
-    role: str | None
     evaluations: list[str] | None
     crawlers: GenericCrawler
     _external_evalutations: dict[str, Any]
@@ -35,9 +35,9 @@ class Crawler:
         self,
         services: str | list[str] = ...,
         skip: str | list[str] | None = ...,
-        profiles: str | list[str | None] = ...,
-        regions: str | list[str | None] = ...,
-        role: str | None = ...,
+        profiles: list[str | None] = ...,
+        roles: list[str] | None = ...,
+        regions: list[str | None] = ...,
         evaluations: list[str] | None = ...,
     ) -> None: ...
     def _apply_external_evaluations(self) -> None: ...

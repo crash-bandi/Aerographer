@@ -59,7 +59,7 @@ from aerographer.exceptions import (
     EvaluationModuleFailedToLoadExecptionError,
     InvalidServiceDefinitionsExceptionError,
 )
-from aerographer.config import SERVICE_DEFINITIONS, PROFILES, ROLE, REGIONS
+from aerographer.config import SERVICE_DEFINITIONS, PROFILES, ROLES, REGIONS
 
 _CRAWLERS: dict[str, GenericCrawler] = {}
 
@@ -660,36 +660,29 @@ class Crawler:
     def __init__(
         self,
         services: str | list[str] = '*',
-        skip: str | list[str] | None = None,  # safe default to []
-        profiles: str | list[str | None] | None = None,  # safe default to list
-        regions: str | list[str | None] | None = None,  # safe default to list
-        role: str | None = None,
-        evaluations: list[str] | None = None,  # safe default to []
+        skip: str | list[str] | None = None,  # safe default for list
+        profiles: list[str] | None = None,  # safe default for list
+        roles: list[str] | None = None,  # safe default for list
+        regions: list[str] | None = None,  # safe default for list
+        evaluations: list[str] | None = None,  # safe default for list
     ) -> None:
         """Class initializer."""
 
         if logger.getEffectiveLevel() <= 10:
             LogFormatter.debug = True
 
-        if profiles is not None and isinstance(profiles, str):
-            services = [profiles]
-        if regions is not None and isinstance(regions, str):
-            regions = [regions]
+        if services != '*' and isinstance(services, str):
+            services = [services]
+        if skip is not None and isinstance(skip, str):
+            skip = [skip]
 
         self.services = services
         self.profiles = profiles or PROFILES
-        self.role = role or ROLE
+        self.roles = roles or ROLES
         self.regions = regions or REGIONS
         self.skip = skip or []
         self.evaluations = evaluations or []
         self._external_evalutations: dict[str, Any] = {}
-
-        # initialize contexts
-        self.accounts = [
-            {'profile': profile, 'regions': self.regions, 'role': self.role}
-            for profile in self.profiles
-        ]
-        scan.CONTEXTS = scan.init(self.accounts)
 
         # apply provided external evaluations to web crawlers
         for path in self.evaluations:
@@ -714,6 +707,17 @@ class Crawler:
         except CrawlerNotFoundExecptionError as err:
             logger.error('Error getting crawlers for %s -- %s', self.services, err)
             sys.exit(1)
+
+        # initialize contexts
+        self.accounts = [
+            {'profile': profile, 'regions': self.regions, 'role': role}
+            for profile in self.profiles
+            for role in self.roles
+        ]
+        scan.CONTEXTS = scan.init(
+            self.accounts,
+            services=set([crawler.serviceType for crawler in self.crawlers]),
+        )
 
     def _apply_external_evaluations(self) -> None:
         """Apply external evaluations to crawlers.

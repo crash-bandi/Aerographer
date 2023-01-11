@@ -20,7 +20,7 @@ from typing import Any
 MODULE_PATH: str
 LOGGING_LEVEL: str
 PROFILES: list[str | None]
-ROLE: str | None
+ROLES: list[str | None]
 REGIONS: list[str | None]
 ACCOUNTS: list[dict[str, Any]]
 SERVICE_DEFINITIONS_CONFIG: str

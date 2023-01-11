@@ -49,7 +49,7 @@ MODULE_PATH: str = str(pathlib.Path(__file__).parent.absolute())
 # external properties
 LOGGING_LEVEL: str = os.getenv('AG_LOGGING_LEVEL', 'none')
 PROFILES: list[str | None] = separate(os.getenv('AG_AWS_PROFILES', None))
-ROLE: str | None = os.getenv('AG_AWS_ROLE', None)
+ROLES: list[str | None] = separate(os.getenv('AG_AWS_ROLES', None))
 REGIONS: list[str | None] = separate(
     os.getenv('AG_AWS_REGIONS', os.getenv('AWS_REGION', None))
 )
@@ -57,7 +57,9 @@ SERVICE_DEFINITIONS_CONFIG: str = os.getenv(
     'AG_SERVICE_DEFINITIONS', f"{MODULE_PATH}/service_definitions.json"
 )
 ACCOUNTS: list[dict[str, Any]] = [
-    {'profile': profile, 'regions': REGIONS, 'role': ROLE} for profile in PROFILES
+    {'profile': profile, 'regions': REGIONS, 'role': role}
+    for profile in PROFILES
+    for role in ROLES
 ]
 
 

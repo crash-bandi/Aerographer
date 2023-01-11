@@ -57,11 +57,11 @@ def _init_sessions(accounts: list[dict[str, Any]] = ACCOUNTS) -> tuple[SESSION, 
     for account in accounts:
         for region in account['regions']:
             session = get_session(profile=account['profile'], region=region)
-            account_id = get_caller_id(session=session)['Account']
 
             if account['role']:
-                role_arn = f'arn:aws:iam::{account_id}:role/{account["role"]}'
-                session = assume_role(session=session, role_arn=role_arn)
+                session = assume_role(session=session, role_arn=account['role'])
+
+            account_id = get_caller_id(session=session)['Account']
 
             logger.trace('Initializing session %s.%s...', account_id, region)  # type: ignore
             sessions.append(
@@ -73,7 +73,9 @@ def _init_sessions(accounts: list[dict[str, Any]] = ACCOUNTS) -> tuple[SESSION, 
     return tuple(sessions)
 
 
-def _init_contexts(sessions: tuple[SESSION, ...]) -> tuple[CONTEXT, ...]:
+def _init_contexts(
+    sessions: tuple[SESSION, ...], services: set[str]
+) -> tuple[CONTEXT, ...]:
     """Create scan contexts.
 
     Creates a collection of `CONTEXT` instances using list of sessions
@@ -81,6 +83,8 @@ def _init_contexts(sessions: tuple[SESSION, ...]) -> tuple[CONTEXT, ...]:
 
     Args:
         sessions (tuple): List of `SESSION` instances to use for creating
+            `CONTEXT` instances.
+        services (set[str]): Set of services to use for creating
             `CONTEXT` instances.
 
     Return:
@@ -90,7 +94,7 @@ def _init_contexts(sessions: tuple[SESSION, ...]) -> tuple[CONTEXT, ...]:
     contexts: list[CONTEXT] = []
     for session in sessions:
         caller_id = get_caller_id(session.session)
-        for service in SERVICE_DEFINITIONS:
+        for service in services:
             logger.trace(  # type: ignore
                 'Initializing context %s:%s:%s...',
                 caller_id["Account"],
@@ -110,17 +114,18 @@ def _init_contexts(sessions: tuple[SESSION, ...]) -> tuple[CONTEXT, ...]:
     return tuple(contexts)
 
 
-def init(accounts: list[dict[str, Any]]) -> tuple[CONTEXT, ...]:
+def init(accounts: list[dict[str, Any]], services: set[str]) -> tuple[CONTEXT, ...]:
     """Initializes scan contexts.
 
     Initializes contexts for current scan.
 
     Args:
         accounts (list[dict]): List of account properties to use for initialization.
+        services (set[str]): Set of services to use for initialization.
 
     Return:
         Tuple containing created `CONTEXT` instances.
     """
 
     sessions = _init_sessions(accounts)
-    return _init_contexts(sessions)
+    return _init_contexts(sessions, services)
