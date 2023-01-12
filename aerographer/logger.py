@@ -170,4 +170,4 @@ if logger.level in (log_levels['debug'], log_levels['trace']):
 
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-logger.debug('Logger created.')
+logger.trace('Logger created.')  # type: ignore
