@@ -23,6 +23,8 @@ is stored. Not meant for external use.
 """
 
 from typing import Any
+import asyncio
+from aerographer.scan.parallel import asyncify
 from aerographer.scan.context import (
     SESSION,
     CONTEXT,
@@ -39,7 +41,73 @@ SURVEY: dict[str, Any] = {}
 CONTEXTS: tuple[CONTEXT, ...]
 
 
-def _init_sessions(accounts: list[dict[str, Any]] = ACCOUNTS) -> tuple[SESSION, ...]:
+def _init_session(profile: str, region: str, role: str) -> SESSION:
+    """Create a scan session.
+
+    Creates a `SESSION` instances using profile, region and role provided.
+
+    Args:
+        profile (str): profile to use to create `SESSION` instance.
+        region (str): region to use to create `SESSION` instance.
+        role (str): role to use to create `SESSION` instance.
+
+    Return:
+        `SESSION` instances.
+    """
+    session = get_session(profile=profile, region=region)
+
+    if role:
+        session = assume_role(session=session, role_arn=role)
+
+    account_id = get_caller_id(session=session)['Account']
+
+    logger.trace('Initializing session %s.%s...', account_id, region)  # type: ignore
+
+    return SESSION(region=session.region_name, session=session)
+
+
+def _init_service_contexts(session: SESSION, services: set[str]) -> list[CONTEXT]:
+    caller_id = get_caller_id(session.session)
+    """Create a collection scan contexts for the context and services provided.
+
+    Creates a collection of `CONTEXT` instances using session and list of
+    services provided.
+
+    Args:
+        session (SESSION): `SESSION` instance to use for creating
+            `CONTEXT` instances.
+        services (set[str]): Set of services to use for creating
+            `CONTEXT` instances.
+
+    Return:
+        list containing created `CONTEXT` instances.
+    """
+
+    contexts: list[CONTEXT] = []
+    for service in services:
+        logger.trace(  # type: ignore
+            'Initializing context %s:%s:%s...',
+            caller_id["Account"],
+            service,
+            session.region,
+        )
+        contexts.append(
+            CONTEXT(
+                name=f'{caller_id["Account"]}:{session.region}:{service}',
+                account_id=caller_id['Account'],
+                region=session.region,
+                service=service,
+                client=get_client(service=service, session=session.session),
+                session=session.session,
+            )
+        )
+
+    return contexts
+
+
+async def _init_sessions(
+    accounts: list[dict[str, Any]] = ACCOUNTS
+) -> tuple[SESSION, ...]:
     """Create scan sessions.
 
     Creates a collection of `SESSION` instances using list of account
@@ -53,27 +121,19 @@ def _init_sessions(accounts: list[dict[str, Any]] = ACCOUNTS) -> tuple[SESSION, 
         Tuple containing created `SESSION` instances.
     """
 
-    sessions: list[SESSION] = []
-    for account in accounts:
-        for region in account['regions']:
-            session = get_session(profile=account['profile'], region=region)
-
-            if account['role']:
-                session = assume_role(session=session, role_arn=account['role'])
-
-            account_id = get_caller_id(session=session)['Account']
-
-            logger.trace('Initializing session %s.%s...', account_id, region)  # type: ignore
-            sessions.append(
-                SESSION(
-                    region=region,
-                    session=session,
-                )
+    logger.debug('Initializing sessions...')
+    return tuple(
+        await asyncio.gather(
+            *(
+                asyncify(_init_session, account['profile'], region, account['role'])
+                for account in accounts
+                for region in account['regions']
             )
-    return tuple(sessions)
+        )
+    )
 
 
-def _init_contexts(
+async def _init_contexts(
     sessions: tuple[SESSION, ...], services: set[str]
 ) -> tuple[CONTEXT, ...]:
     """Create scan contexts.
@@ -91,27 +151,18 @@ def _init_contexts(
         Tuple containing created `CONTEXT` instances.
     """
 
-    contexts: list[CONTEXT] = []
-    for session in sessions:
-        caller_id = get_caller_id(session.session)
-        for service in services:
-            logger.trace(  # type: ignore
-                'Initializing context %s:%s:%s...',
-                caller_id["Account"],
-                service,
-                session.region,
-            )
-            contexts.append(
-                CONTEXT(
-                    name=f'{caller_id["Account"]}:{session.region}:{service}',
-                    account_id=caller_id['Account'],
-                    region=session.region,
-                    service=service,
-                    client=get_client(service=service, session=session.session),
-                    session=session.session,
+    logger.debug('Initializing contexts...')
+    return tuple(
+        sum(
+            await asyncio.gather(
+                *(
+                    asyncify(_init_service_contexts, session, services)
+                    for session in sessions
                 )
-            )
-    return tuple(contexts)
+            ),
+            [],
+        )
+    )
 
 
 def init(accounts: list[dict[str, Any]], services: set[str]) -> tuple[CONTEXT, ...]:
@@ -127,5 +178,5 @@ def init(accounts: list[dict[str, Any]], services: set[str]) -> tuple[CONTEXT, .
         Tuple containing created `CONTEXT` instances.
     """
 
-    sessions = _init_sessions(accounts)
-    return _init_contexts(sessions, services)
+    sessions = asyncio.run(_init_sessions(accounts))
+    return asyncio.run(_init_contexts(sessions, services))
