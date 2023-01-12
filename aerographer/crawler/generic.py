@@ -23,6 +23,7 @@ from types import FunctionType
 from typing import Any, Callable, Generator, Iterable, Protocol
 from dataclasses import asdict
 import json
+import asyncio
 
 from botocore.exceptions import ParamValidationError, ClientError, OperationNotPageableError  # type: ignore
 
@@ -54,11 +55,16 @@ class PaginateWrapper:
     def __init__(self, func: FunctionType) -> None:
         self.func = func
 
-    def paginate(self, **kwargs: Any) -> Generator[dict[str, Any], Any, Any]:
+    def paginate(
+        self, page_marker: str | None = None, **kwargs: Any
+    ) -> Generator[dict[str, Any], Any, Any]:
         """Iterate through pages of resource.
 
         Iterages through all pages of information provided by API call
         made by provided function and returns result.
+
+        Args:
+            page_marker (str): Pager maker attribute name to use for pagination.
 
         Returns:
             Generator for list of pages.
@@ -66,6 +72,18 @@ class PaginateWrapper:
         page: dict[str, Any] = self.func(**kwargs)
         yield page
 
+        if page_marker:
+            if page_marker in page:
+                while page_marker in page:
+                    page = self.func(**{page_marker: page[page_marker]} | kwargs)
+                    yield page
+
+            elif 'IsTruncated' in page:
+                while page['IsTruncated']:
+                    page = self.func(**{page_marker: page[page_marker]} | kwargs)
+                    yield page
+
+        # Legacy method of using page marker. SERVICE_DEFINITIONS need to be appropriate page_marker attribute.
         if 'NextToken' in page:
             while 'NextToken' in page:
                 page = self.func(NextToken=page['NextToken'], **kwargs)
@@ -114,7 +132,7 @@ class GenericCustomPaginator:
                 getattr(context.client, paginator_func_name)
             )
 
-        setattr(self.paginator, 'service', context.service)
+        setattr(self.paginator, 'context', context.name)
         setattr(self.paginator, 'function', paginator_func_name)
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
@@ -230,7 +248,9 @@ class GenericCrawler:
                 )
             except AttributeError:
                 pass
-                # logger.debug('no iac id found for %s.%s', self.__class__.__name__, self.id) <--- should be logging level trace
+                logger.trace(  # type: ignore
+                    'no iac id found for %s.%s', self.__class__.__name__, self.id
+                )
 
         self.iac_id: str = iac_id
 
@@ -375,12 +395,63 @@ class GenericCrawler:
             ) from None
 
     @classmethod
+    async def _scan_context(cls, context: CONTEXT) -> None:
+        """Run asyncronous scan on provided context.
+
+        Runs the scan of target resource of provided conteext asyncrously.
+        Once scan is complete, create a class instance for each resource found
+        and add it to `RESOURCE COLLECTION`.
+
+        Args:
+            context (CONTEXT): context to use to run scan.
+
+        Raises:
+            FailedCrawlerScanExceptionError: Scan failed.
+        """
+
+        logger.debug('Scanning %s:%s...', context.name, cls.resourceName)
+
+        # get pager
+        paginator = cls._get_paginator(context)
+
+        try:
+            # run scan
+            logger.trace(  # type: ignore
+                '%s is getting asyncify %s:%s',
+                cls.__name__,
+                context.name,
+                paginator.paginate.__name__,
+            )
+            pages: Iterable[dict[str, Any]] = await asyncify(
+                paginator.paginate, **cls.scanParameters
+            )
+
+            # create new class instance for each resource found and add to SURVEY
+            for resource in (
+                resource for page in pages for resource in page[cls.resourceType]
+            ):
+                resource_instance: GenericCrawler = cls(
+                    context=context, metadata=resource
+                )
+                scan.SURVEY[cls.serviceType][cls.resourceName].update(
+                    {resource_instance.id: resource_instance}
+                )
+
+        except ParamValidationError as err:
+            raise FailedCrawlerScanExceptionError(
+                (
+                    f'Failed scan of {context.name}:{cls.resourceName} - invalid scan parameters.'
+                )
+            ) from err
+        except (ClientError, MetadataClassNotFoundExecptionError) as err:
+            raise FailedCrawlerScanExceptionError(err) from err
+
+    @classmethod
     async def scan(cls) -> None:
         """Run asyncronous scan.
 
         Runs the scan of target resource asyncrously if scan is not already active or
-        complete. Once scan is complete, create a class instance for each resource found
-        and add it to `RESOURCE COLLECTION`.
+        complete.
 
         Raises:
             FailedCrawlerScanExceptionError: Scan failed.
@@ -403,41 +474,14 @@ class GenericCrawler:
         # mark scan as active
         cls.state = 'active'
         logger.info('Scanning %s:%s...', cls.serviceType, cls.resourceName)
-        for context in [
-            context for context in scan.CONTEXTS if context.service == cls.serviceType
-        ]:
 
-            logger.debug('Scanning %s:%s...', context.name, cls.resourceName)
-
-            # get pager
-            paginator = cls._get_paginator(context)
-
-            try:
-                # run scan
-                # logger.debug('%s is getting asyncify %s',cls.__name__ ,paginator.paginate.__name__) <-- should be trace level log
-                pages: Iterable[dict[str, Any]] = await asyncify(
-                    paginator.paginate, **cls.scanParameters
-                )
-
-                # create new class instance for each resource found and add to SURVEY
-                for resource in (
-                    resource for page in pages for resource in page[cls.resourceType]
-                ):
-                    resource_instance: GenericCrawler = cls(
-                        context=context, metadata=resource
-                    )
-                    scan.SURVEY[cls.serviceType][cls.resourceName].update(
-                        {resource_instance.id: resource_instance}
-                    )
-
-            except ParamValidationError as err:
-                raise FailedCrawlerScanExceptionError(
-                    (
-                        f'Failed scan of {context.name}:{cls.resourceName} - invalid scan parameters.'
-                    )
-                ) from err
-            except (ClientError, MetadataClassNotFoundExecptionError) as err:
-                raise FailedCrawlerScanExceptionError(err) from err
+        await asyncio.gather(
+            *(
+                cls._scan_context(context)
+                for context in scan.CONTEXTS
+                if context.service == cls.serviceType
+            )
+        )
 
         # mark scan as complete
         cls.state = 'complete'
