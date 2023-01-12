@@ -110,6 +110,7 @@ def initialize_crawler(service: str, resource: str) -> GenericCrawler:
         "resourceType",
         "idAttribute",
         "paginator",
+        "page_marker",
         "scanParameters",
         "responseSchema",
     ]
@@ -791,6 +792,7 @@ class Crawler:
         # this is so instances created to fulfill dependancy scan requirements are not returned
         RETURN_COLLECTION: dict[str, Any] = {}  # pylint: disable=invalid-name
 
+        # TODO: this needs rework as it does not strip unrequested resources from return collection. use kms.key_rotation to observe.
         for crawler in self.crawlers:
             if crawler.serviceType not in RETURN_COLLECTION:
                 RETURN_COLLECTION[crawler.serviceType] = {}

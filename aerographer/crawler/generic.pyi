@@ -25,8 +25,8 @@ from aerographer.scan.context import CONTEXT
 class PaginateWrapper:
     func: FunctionType
 
-    def __init__(self, func: FunctionType) -> None: ...
-    def paginate(self, page_marker: str , **kwargs: Any) -> Generator[dict[str, Any], Any, Any]: ...
+    def __init__(self, func: FunctionType, page_marker:str) -> None: ...
+    def paginate(self, **kwargs: Any) -> Generator[dict[str, Any], Any, Any]: ...
 
 class GenericCustomPaginator(ABC):
     INCLUDE: list[str]
@@ -35,7 +35,7 @@ class GenericCustomPaginator(ABC):
     _paginate_func: Callable[..., Any]
     paginator: Callable[..., Any]
 
-    def __init__(self, context: CONTEXT, paginator_func_name: str) -> None: ...
+    def __init__(self, context: CONTEXT, paginator_func_name: str, page_marker: str) -> None: ...
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]: ...
 
 class GenericMetadata(Protocol):
@@ -50,6 +50,7 @@ class GenericCrawler:
     resourceType: str
     resourceName: str
     paginator: str
+    page_marker: str
     scanParameters: dict[str, Any]
     idAttribute: str
     data: GenericMetadata

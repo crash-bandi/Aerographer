@@ -4,6 +4,7 @@
             "resourceType": "Vpcs",
             "idAttribute": "VpcId",
             "paginator": "describe_vpcs",
+            "page_marker": null,
             "scanParameters": {"Filters": [{"Name": "tag:PLATFORM","Values": ["COMMONSERVICES"]}]},
             "responseSchema": {
                 "CidrBlock": "string",
@@ -47,6 +48,7 @@
             "resourceType": "Instances",
             "idAttribute": "InstanceId",
             "paginator": "describe_instances",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "AmiLaunchIndex": 123,
@@ -263,6 +265,7 @@
             "resourceType": "Subnets",
             "idAttribute": "SubnetId",
             "paginator": "describe_subnets",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "AvailabilityZone": "string",
@@ -310,6 +313,7 @@
             "resourceType": "SecurityGroups",
             "idAttribute": "GroupId",
             "paginator":  "describe_security_groups",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "Description": "string",
@@ -401,6 +405,7 @@
             "resourceType": "NetworkInterfaces",
             "idAttribute": "NetworkInterfaceId",
             "paginator": "describe_network_interfaces",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "Association": {
@@ -489,6 +494,7 @@
             "resourceType": "LaunchTemplates",
             "idAttribute": "LaunchTemplateId",
             "paginator": "describe_launch_templates",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "LaunchTemplateId": "string",
@@ -509,6 +515,7 @@
             "resourceType": "LaunchTemplateVersions",
             "idAttribute": "LaunchTemplateId",
             "paginator": "describe_launch_template_versions",
+            "page_marker": null,
             "scanParameters": {"Versions": ["$Default"]},
             "responseSchema": {
                 "LaunchTemplateId": "string",
@@ -751,6 +758,7 @@
             "resourceType": "Fleets",
             "idAttribute": "FleetId",
             "paginator": "describe_fleets",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "ActivityStatus": "error",
@@ -1069,6 +1077,7 @@
             "resourceType": "SpotFleetRequestConfigs",
             "idAttribute": "SpotFleetRequestId",
             "paginator": "describe_spot_fleet_requests",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "ActivityStatus": "error",
@@ -1390,6 +1399,7 @@
             "resourceType":  "Parameters",
             "idAttribute": "Name",
             "paginator": "describe_parameters",
+            "page_marker": null,
             "scanParameters":  {},
             "responseSchema": {
                 "Name": "string",
@@ -1417,6 +1427,7 @@
             "resourceType": "CacheClusters",
             "idAttribute": "CacheClusterId",
             "paginator": "describe_cache_clusters",
+            "page_marker": null,
             "scanParameters":  {},
             "responseSchema": {
                 "CacheClusterId": "string",
@@ -1530,6 +1541,7 @@
             "resourceType": "ReplicationGroups",
             "idAttribute": "ReplicationGroupId",
             "paginator": "describe_replication_groups",
+            "page_marker": null,
             "scanParameters":  {},
             "responseSchema": {
                 "ReplicationGroupId": "string",
@@ -1651,6 +1663,7 @@
             "resourceType": "TagList",
             "idAttribute": "ReplicationGroupId",
             "paginator": "list_tags_for_resource",
+            "page_marker": null,
             "scanParameters":  {},
             "responseSchema": {
                 "ReplicationGroupId": "string",
@@ -1664,6 +1677,7 @@
             "resourceType":  "LoadBalancerDescriptions",
             "idAttribute": "LoadBalancerName",
             "paginator": "describe_load_balancers",
+            "page_marker": null,
             "scanParameters":  {},
             "responseSchema": {
                 "LoadBalancerName": "string",
@@ -1743,6 +1757,7 @@
             "resourceType":  "TagDescriptions",
             "idAttribute": "LoadBalancerName",
             "paginator": "describe_tags",
+            "page_marker": null,
             "scanParameters":  {},
             "responseSchema": {
                 "LoadBalancerName": "string",
@@ -1760,6 +1775,7 @@
             "resourceType":  "LoadBalancers",
             "idAttribute": "LoadBalancerName",
             "paginator": "describe_load_balancers",
+            "page_marker": null,
             "scanParameters":  {},
             "responseSchema": {
                 "LoadBalancerArn": "string",
@@ -1800,6 +1816,7 @@
             "resourceType":  "TagDescriptions",
             "idAttribute": "ResourceArn",
             "paginator": "describe_tags",
+            "page_marker": null,
             "scanParameters":  {},
             "responseSchema": {
                 "ResourceArn": "string",
@@ -1817,6 +1834,7 @@
             "resourceType":  "FileSystems",
             "idAttribute": "FileSystemId",
             "paginator": "describe_file_systems",
+            "page_marker": null,
             "scanParameters":  {},
             "responseSchema": {
                 "OwnerId": "string",
@@ -1854,6 +1872,7 @@
             "resourceType": "AutoScalingGroups",
             "idAttribute": "AutoScalingGroupName",
             "paginator": "describe_auto_scaling_groups",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "AutoScalingGroupName": "string",
@@ -2037,6 +2056,7 @@
             "resourceType": "LaunchConfigurations",
             "idAttribute": "LaunchConfigurationName",
             "paginator": "describe_launch_configurations",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "LaunchConfigurationName": "string",
@@ -2092,6 +2112,7 @@
             "resourceType": "Keys",
             "idAttribute": "KeyId",
             "paginator": "list_keys",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "KeyId": "string",
@@ -2102,6 +2123,7 @@
             "resourceType": "KeyMetadata",
             "idAttribute": "KeyId",
             "paginator": "describe_key",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "AWSAccountId": "string",
@@ -2151,6 +2173,7 @@
             "resourceType": "KeyRotation",
             "idAttribute": "KeyId",
             "paginator": "get_key_rotation_status",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "KeyId": "string",
@@ -2163,6 +2186,7 @@
             "resourceType": "Table",
             "idAttribute": "TableId",
             "paginator": "describe_table",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "AttributeDefinitions": [
@@ -2303,6 +2327,7 @@
             "resourceType": "TableNames",
             "idAttribute": "TableId",
             "paginator": "list_tables",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "TableId": "string"
@@ -2314,6 +2339,7 @@
             "resourceType": "Roles",
             "idAttribute": "RoleName",
             "paginator": "list_roles",
+            "page_marker": "Marker",
             "scanParameters": {},
             "responseSchema": {
                 "Path": "string",
@@ -2344,6 +2370,7 @@
             "resourceType": "PolicyNames",
             "idAttribute": "PolicyName",
             "paginator": "list_role_policies",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "RoleName": "string",
@@ -2354,6 +2381,7 @@
             "resourceType": "RolePolicies",
             "idAttribute": "PolicyName",
             "paginator": "get_role_policy",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "RoleName": "string",
@@ -2365,6 +2393,7 @@
             "resourceType": "AttachedPolicies",
             "idAttribute": "PolicyName",
             "paginator": "list_attached_role_policies",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "RoleName": "string",
@@ -2377,6 +2406,7 @@
             "idAttribute": "PolicyName",
             "paginator": "list_policies",
             "scanParameters":  {"Scope": "Local"},
+            "page_marker": null,
             "responseSchema": {
                 "PolicyName": "string",
                 "PolicyId": "string",
@@ -2401,6 +2431,7 @@
             "resourceType": "PolicyDocuments",
             "idAttribute": "PolicyName",
             "paginator": "get_policy_version",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "PolicyName": "string",
@@ -2414,6 +2445,7 @@
             "resourceType": "Policies",
             "idAttribute": "PolicyName",
             "paginator": "list_policies",
+            "page_marker": null,
             "scanParameters":  {"Scope": "AWS"},
             "responseSchema": {
                 "PolicyName": "string",
@@ -2439,6 +2471,7 @@
             "resourceType": "PolicyDocuments",
             "idAttribute": "PolicyName",
             "paginator": "get_policy_version",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "PolicyName": "string",
@@ -2454,6 +2487,7 @@
             "resourceType": "HostedZones",
             "idAttribute": "Id",
             "paginator": "list_hosted_zones",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "Id": "string",
@@ -2474,6 +2508,7 @@
             "resourceType": "ResourceRecordSets",
             "idAttribute": "Id",
             "paginator": "list_resource_record_sets",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "Name": "string",
@@ -2515,6 +2550,7 @@
             "resourceType": "Functions",
             "idAttribute": "FunctionName",
             "paginator": "list_functions",
+            "page_marker": null,
             "scanParameters": {},
             "responseSchema": {
                 "FunctionName": "string",

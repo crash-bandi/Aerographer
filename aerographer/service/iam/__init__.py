@@ -69,7 +69,7 @@ class RolePaginator(GenericCustomPaginator):
         # get_role for each role name
         role_results = await async_paginate(
             paginator=GenericCustomPaginator(
-                context=self.context, paginator_func_name='get_role'
+                context=self.context, paginator_func_name='get_role', page_marker=None
             ).paginator,
             id_key='RoleName',
             id_values=roles,

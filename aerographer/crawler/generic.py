@@ -46,25 +46,22 @@ class PaginateWrapper:
     """Wrapper class for boto3 client function without native paginator.
 
     Attributes:
-        func: function to paginate.
+        func (FunctionType): function to paginate.
+        page_marker (str): attribute used to page with.
 
     Methods:
         paginate(**kwargs): Retrieve data.
     """
 
-    def __init__(self, func: FunctionType) -> None:
+    def __init__(self, func: FunctionType, page_marker: str) -> None:
         self.func = func
+        self.page_marker = page_marker
 
-    def paginate(
-        self, page_marker: str | None = None, **kwargs: Any
-    ) -> Generator[dict[str, Any], Any, Any]:
+    def paginate(self, **kwargs: Any) -> Generator[dict[str, Any], Any, Any]:
         """Iterate through pages of resource.
 
         Iterages through all pages of information provided by API call
         made by provided function and returns result.
-
-        Args:
-            page_marker (str): Pager maker attribute name to use for pagination.
 
         Returns:
             Generator for list of pages.
@@ -72,18 +69,22 @@ class PaginateWrapper:
         page: dict[str, Any] = self.func(**kwargs)
         yield page
 
-        if page_marker:
-            if page_marker in page:
-                while page_marker in page:
-                    page = self.func(**{page_marker: page[page_marker]} | kwargs)
+        if self.page_marker:
+            if self.page_marker in page:
+                while self.page_marker in page:
+                    page = self.func(
+                        **{self.page_marker: page[self.page_marker]} | kwargs
+                    )
                     yield page
 
             elif 'IsTruncated' in page:
                 while page['IsTruncated']:
-                    page = self.func(**{page_marker: page[page_marker]} | kwargs)
+                    page = self.func(
+                        **{self.page_marker: page[self.page_marker]} | kwargs
+                    )
                     yield page
 
-        # Legacy method of using page marker. SERVICE_DEFINITIONS need to be appropriate page_marker attribute.
+        # TODO: Legacy method of using page marker. SERVICE_DEFINITIONS need to be updated with appropriate page_marker attributes.
         if 'NextToken' in page:
             while 'NextToken' in page:
                 page = self.func(NextToken=page['NextToken'], **kwargs)
@@ -116,12 +117,15 @@ class GenericCustomPaginator:
 
     INCLUDE: list[str] = []
 
-    def __init__(self, context: CONTEXT, paginator_func_name: str) -> None:
+    def __init__(
+        self, context: CONTEXT, paginator_func_name: str, page_marker: str
+    ) -> None:
 
         self.context: CONTEXT = context
         self._paginate_func: Callable[..., Any] = getattr(
             context.client, paginator_func_name
         )
+        self.page_marker = page_marker
 
         try:
             self.paginator: Callable[..., Any] = self.context.client.get_paginator(  # type: ignore
@@ -129,7 +133,8 @@ class GenericCustomPaginator:
             )
         except OperationNotPageableError:
             self.paginator: PaginateWrapper = PaginateWrapper(  # type: ignore
-                getattr(context.client, paginator_func_name)
+                func=getattr(context.client, paginator_func_name),
+                page_marker=self.page_marker,
             )
 
         setattr(self.paginator, 'context', context.name)
@@ -195,6 +200,7 @@ class GenericCrawler:
     resourceType: str
     resourceName: str
     paginator: str
+    page_marker: str
     scanParameters: dict[str, Any]
     idAttribute: str
 
@@ -384,10 +390,13 @@ class GenericCrawler:
                 return cls.custom_paginator(  # pylint: disable=not-callable
                     context=context,
                     paginator_func_name=cls.paginator,  # pylint: disable=not-callable
+                    page_marker=cls.page_marker,
                 )
 
             return GenericCustomPaginator(
-                context=context, paginator_func_name=cls.paginator
+                context=context,
+                paginator_func_name=cls.paginator,
+                page_marker=cls.page_marker,
             )
         except Exception:
             raise PaginatorNotFoundExecptionError(
