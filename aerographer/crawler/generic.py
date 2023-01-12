@@ -83,17 +83,17 @@ class PaginateWrapper:
                         **{self.page_marker: page[self.page_marker]} | kwargs
                     )
                     yield page
-
         # TODO: Legacy method of using page marker. SERVICE_DEFINITIONS need to be updated with appropriate page_marker attributes.
-        if 'NextToken' in page:
-            while 'NextToken' in page:
-                page = self.func(NextToken=page['NextToken'], **kwargs)
-                yield page
+        else:
+            if 'NextToken' in page:
+                while 'NextToken' in page:
+                    page = self.func(NextToken=page['NextToken'], **kwargs)
+                    yield page
 
-        elif 'IsTruncated' in page:
-            while page['IsTruncated']:
-                page = self.func(Marker=page['Marker'], **kwargs)
-                yield page
+            elif 'IsTruncated' in page:
+                while page['IsTruncated']:
+                    page = self.func(Marker=page['Marker'], **kwargs)
+                    yield page
 
 
 class GenericCustomPaginator:
