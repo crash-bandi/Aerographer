@@ -46,9 +46,9 @@ async def asyncify(func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
     """
 
     if inspect.iscoroutinefunction(func):
-        # logger.debug('%s is already coroutine', func.__name__) <-- should be trace level log
+        logger.trace('%s is already coroutine', func.__name__)  # type: ignore
         return await func(*args, **kwargs)
-    # logger.debug('%s is not coroutine, running in thread.', func.__name__) <-- should be trace level log
+    logger.trace('%s is not coroutine, running in thread.', func.__name__)  # type: ignore
     return await asyncio.to_thread(func, *args, **kwargs)
 
 
@@ -111,7 +111,7 @@ async def async_paginate(
     pages_iterables = await asyncio.gather(*paginators)
     pages = await asyncio.gather(
         *[
-            asyncify(_resolve_pages, pager, paginator.service, paginator.function)
+            asyncify(_resolve_pages, pager, paginator.context, paginator.function)
             for pager in pages_iterables
         ]
     )
@@ -120,7 +120,7 @@ async def async_paginate(
 
 
 def _resolve_pages(
-    page_iterator: Iterable[Any], service: str, func: str
+    page_iterator: Iterable[Any], context: str, func: str
 ) -> list[dict[str, Any]]:
     """Resolves pagniator pages.
 
@@ -129,11 +129,11 @@ def _resolve_pages(
 
     Args:
         page_iterator (Any): Page interactor to resolve.
-        service (str): name of service.
+        context (str): name of context.
         func (str): name of function.
     """
-    logger.trace('Paging on %s.%s...', service, func)  # type: ignore
+    logger.trace('Paging on %s.%s...', context, func)  # type: ignore
     pages = [page for page in page_iterator]
-    logger.trace('Done paging %s.%s.', service, func)  # type: ignore
+    logger.trace('Done paging %s.%s.', context, func)  # type: ignore
 
     return pages
