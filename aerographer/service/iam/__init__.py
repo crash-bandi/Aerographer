@@ -354,7 +354,7 @@ class PolicyDocumentPaginator(GenericCustomPaginator):
         return tuple(pages)
 
 
-class AwsManagedPolicyDocumentPaginator(GenericCustomPaginator):
+class ManagedPolicyDocumentPaginator(GenericCustomPaginator):
     """Paginator for AWS managed Policy Document resource.
 
     Custom paginator used to retrieve resource information from AWS.
@@ -368,7 +368,7 @@ class AwsManagedPolicyDocumentPaginator(GenericCustomPaginator):
        paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['iam.aws_managed_policy']
+    INCLUDE = ['iam.managed_policy']
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.
@@ -390,7 +390,7 @@ class AwsManagedPolicyDocumentPaginator(GenericCustomPaginator):
                 'version_id': i.data.DefaultVersionId,  # type:ignore
                 'arn': i.data.Arn,  # type:ignore
             }
-            for i in SURVEY['iam']['aws_managed_policy'].values()
+            for i in SURVEY['iam']['managed_policy'].values()
             if i.context == self.context
         ]
 

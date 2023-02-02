@@ -2441,7 +2441,7 @@
                 "CreateDate": "string"
             }
         },
-        "aws_managed_policy": {
+        "managed_policy": {
             "resourceType": "Policies",
             "idAttribute": "PolicyName",
             "paginator": "list_policies",
@@ -2467,7 +2467,7 @@
                 ]
             }
         },
-        "aws_managed_policy_document": {
+        "managed_policy_document": {
             "resourceType": "PolicyDocuments",
             "idAttribute": "PolicyName",
             "paginator": "get_policy_version",
