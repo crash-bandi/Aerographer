@@ -120,7 +120,6 @@ class GenericCustomPaginator:
     def __init__(
         self, context: CONTEXT, paginator_func_name: str, page_marker: str
     ) -> None:
-
         self.context: CONTEXT = context
         self._paginate_func: Callable[..., Any] = getattr(
             context.client, paginator_func_name
@@ -196,6 +195,7 @@ class GenericCrawler:
     INCLUDE: list[str] = []
 
     # attributes set from service definitions
+    globalService: bool
     serviceType: str
     resourceType: str
     resourceName: str
@@ -205,7 +205,6 @@ class GenericCrawler:
     idAttribute: str
 
     def __init__(self, context: CONTEXT, metadata: dict[str, Any]) -> None:
-
         self.data = self._build_metadata(metadata=metadata)
         self.context = context
         self.results: list[tuple[str, str, bool]] = []
@@ -484,10 +483,13 @@ class GenericCrawler:
         cls.state = 'active'
         logger.info('Scanning %s:%s...', cls.serviceType, cls.resourceName)
 
+        contexts = tuple([scan.CONTEXTS[0]]) if cls.globalService else scan.CONTEXTS
+        print(contexts)
+
         await asyncio.gather(
             *(
                 cls._scan_context(context)
-                for context in scan.CONTEXTS
+                for context in contexts
                 if context.service == cls.serviceType
             )
         )

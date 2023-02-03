@@ -1,5 +1,6 @@
 {
     "ec2": {
+        "globalService": false,
         "vpc": {
             "resourceType": "Vpcs",
             "idAttribute": "VpcId",
@@ -1395,6 +1396,7 @@
         }
     },
     "ssm": {
+        "globalService": false,
         "parameter": {
             "resourceType":  "Parameters",
             "idAttribute": "Name",
@@ -1423,6 +1425,7 @@
         }
     },
     "elasticache": {
+        "globalService": false,
         "cache_cluster": {
             "resourceType": "CacheClusters",
             "idAttribute": "CacheClusterId",
@@ -1673,6 +1676,7 @@
         }
     },
     "elb": {
+        "globalService": false,
         "load_balancer":{
             "resourceType":  "LoadBalancerDescriptions",
             "idAttribute": "LoadBalancerName",
@@ -1771,6 +1775,7 @@
         }
     },
     "elbv2": {
+        "globalService": false,
         "load_balancer": {
             "resourceType":  "LoadBalancers",
             "idAttribute": "LoadBalancerName",
@@ -1830,6 +1835,7 @@
         }
     },
     "efs": {
+        "globalService": false,
         "file_system": {
             "resourceType":  "FileSystems",
             "idAttribute": "FileSystemId",
@@ -1868,6 +1874,7 @@
         }
     },
     "autoscaling": {
+        "globalService": false,
         "autoscaling_group": {
             "resourceType": "AutoScalingGroups",
             "idAttribute": "AutoScalingGroupName",
@@ -2108,6 +2115,7 @@
         }
     },
     "kms": {
+        "globalService": false,
         "key_id": {
             "resourceType": "Keys",
             "idAttribute": "KeyId",
@@ -2182,6 +2190,7 @@
         }
     },
     "dynamodb": {
+        "globalService": false,
         "table": {
             "resourceType": "Table",
             "idAttribute": "TableId",
@@ -2335,6 +2344,7 @@
         }
     },
     "iam": {
+        "globalService": true,
         "role": {
             "resourceType": "Roles",
             "idAttribute": "RoleName",
@@ -2483,6 +2493,7 @@
         }
     },
     "route53": {
+        "globalService": true,
         "hosted_zone" :{
             "resourceType": "HostedZones",
             "idAttribute": "Id",
@@ -2546,6 +2557,7 @@
         }
     },
     "lambda": {
+        "globalService": false,
         "function" :{
             "resourceType": "Functions",
             "idAttribute": "FunctionName",

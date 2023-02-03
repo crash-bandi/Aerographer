@@ -119,6 +119,7 @@ def initialize_crawler(service: str, resource: str) -> GenericCrawler:
 
     try:
         class_definition = SERVICE_DEFINITIONS[service][resource]
+        global_service = SERVICE_DEFINITIONS[service]['globalService']
         # make sure required properties are present
         if any(
             attribute not in class_definition
@@ -128,7 +129,7 @@ def initialize_crawler(service: str, resource: str) -> GenericCrawler:
                 f'Bad service definition found for {service}.{resource}'
             )
 
-        class_definition = {
+        class_definition = {'globalService': global_service} | {
             k: v for k, v in class_definition.items() if k != 'responseSchema'
         }
         # build module path for later import
@@ -417,7 +418,6 @@ def _extract_external_evaluation_functions(module: ModuleType) -> dict[str, Any]
         for _, obj in getmembers(module)
         if isfunction(obj) and getattr(obj, '__evaluation__', False)
     }.items():
-
         # make sure module_data is populated appropriately
         if func.__service__ not in module_data:  # type: ignore
             module_data[func.__service__] = {func.__resource__: {'include': set()}}  # type: ignore

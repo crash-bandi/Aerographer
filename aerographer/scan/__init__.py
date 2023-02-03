@@ -177,6 +177,6 @@ def init(accounts: list[dict[str, Any]], services: set[str]) -> tuple[CONTEXT, .
     Return:
         Tuple containing created `CONTEXT` instances.
     """
-    # TODO: exception handling doesn't work due to asyncio use.
+    # TODO: exception handling doesn't work due to asyncio use. run without credentials to trigger exception.
     sessions = asyncio.run(_init_sessions(accounts))
     return asyncio.run(_init_contexts(sessions, services))
