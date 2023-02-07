@@ -122,11 +122,14 @@ class RolePolicyIdPaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        pages: list[dict[str, Any]] = []
+
+        if not SURVEY['iam']['role'].values():
+            return tuple(pages)
+
         roles: list[str] = [
             i.id for i in SURVEY['iam']['role'].values() if i.context == self.context
         ]
-
-        pages: list[dict[str, Any]] = []
 
         results = dict(
             zip(
@@ -182,15 +185,19 @@ class RolePolicyPaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        pages: list[dict[str, Any]] = []
+
+        if not SURVEY['iam']['role_policy_id'].values():
+            return tuple(pages)
+
         role_and_policy_names: list[dict[str, str]] = [
             {
-                policy.data.RoleName: policy.id  # type:ignore
+                policy.RoleName: policy.id  # type:ignore
             }
             for policy in SURVEY['iam']['role_policy_id'].values()
             if policy.context == self.context
         ]
 
-        pages: list[dict[str, Any]] = []
         new_page: dict[str, list[dict[str, Any]]] = {'RolePolicies': []}
 
         results = await asyncio.gather(
@@ -249,13 +256,16 @@ class RoleAttachedPolicyPaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        pages: list[dict[str, Any]] = []
+
+        if not SURVEY['iam']['role'].values():
+            return tuple(pages)
+
         roles: list[str] = [
             role.id
             for role in SURVEY['iam']['role'].values()
             if role.context == self.context
         ]
-
-        pages: list[dict[str, Any]] = []
 
         results = dict(
             zip(
@@ -308,17 +318,21 @@ class PolicyDocumentPaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        pages: list[dict[str, Any]] = []
+
+        if not SURVEY['iam']['policy'].values():
+            return tuple(pages)
+
         policies: list[dict[str, str]] = [
             {
                 'id': i.id,
-                'version_id': i.data.DefaultVersionId,  # type:ignore
-                'arn': i.data.Arn,  # type:ignore
+                'version_id': i.DefaultVersionId,  # type:ignore
+                'arn': i.Arn,  # type:ignore
             }
             for i in SURVEY['iam']['policy'].values()
             if i.context == self.context
         ]
 
-        pages: list[dict[str, Any]] = []
         page: dict[str, list[dict[str, str]]] = {'PolicyDocuments': []}
 
         results: dict[str, list[list[dict[str, Any]]]] = dict(
@@ -387,17 +401,21 @@ class ManagedPolicyDocumentPaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        pages: list[dict[str, Any]] = []
+
+        if not SURVEY['iam']['managed_policy'].values():
+            return tuple(pages)
+
         policies: list[dict[str, str]] = [
             {
                 'id': i.id,
-                'version_id': i.data.DefaultVersionId,  # type:ignore
-                'arn': i.data.Arn,  # type:ignore
+                'version_id': i.DefaultVersionId,  # type:ignore
+                'arn': i.Arn,  # type:ignore
             }
             for i in SURVEY['iam']['managed_policy'].values()
             if i.context == self.context
         ]
 
-        pages: list[dict[str, Any]] = []
         page: dict[str, list[dict[str, str]]] = {'PolicyDocuments': []}
 
         results: dict[str, list[list[dict[str, Any]]]] = dict(

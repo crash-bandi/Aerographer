@@ -19,7 +19,7 @@ Contains any customer paginators for service.
 """
 
 from typing import Any
-from aerographer.crawler import SURVEY
+from aerographer.scan import SURVEY
 from aerographer.scan.parallel import async_paginate
 from aerographer.crawler import get_crawlers, deploy_crawlers
 from aerographer.crawler.generic import GenericCustomPaginator
@@ -98,6 +98,11 @@ class TablePaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        pages: list[dict[str, Any]] = []
+
+        if not SURVEY['dynamodb']['table_id'].values():
+            return tuple(pages)
+
         tables: list[str] = [
             i.id
             for i in SURVEY['dynamodb']['table_id'].values()
@@ -105,7 +110,6 @@ class TablePaginator(GenericCustomPaginator):
         ]
 
         ## return a single page with multiple results
-        pages: list[dict[str, Any]] = []
         new_page: dict[str, list[dict[str, str]]] = {'Table': []}
 
         results = await async_paginate(

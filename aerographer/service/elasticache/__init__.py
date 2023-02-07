@@ -60,13 +60,16 @@ class ReplicationGroupTagPaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
-        replication_groups: list[str] = [
-            i.data.ARN
+        pages: list[dict[str, Any]] = []
+
+        if not SURVEY['elasticache']['replication_group'].values():
+            return tuple(pages)
+
+        replication_groups = [
+            i.ARN
             for i in SURVEY['elasticache']['replication_group'].values()
             if i.context == self.context
         ]
-
-        pages: list[dict[str, Any]] = []
 
         results = dict(
             zip(

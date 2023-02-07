@@ -60,14 +60,18 @@ class TagPaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        pages: list[dict[str, Any]] = []
+
+        if not SURVEY['elb']['load_balancer'].values():
+            return tuple(pages)
+
         load_balancers: list[str] = [
-            i.data.LoadBalancerName  # type: ignore
+            i.LoadBalancerName  # type: ignore
             for i in SURVEY['elb']['load_balancer'].values()
             if i.context == self.context
         ]
 
         chunks = [load_balancers[x : x + 20] for x in range(0, len(load_balancers), 20)]
-        pages: list[dict[str, Any]] = []
 
         results = await async_paginate(
             paginator=self.paginator,

@@ -106,16 +106,20 @@ class KeyRotationPaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        pages: list[dict[str, Any]] = []
+
+        if not SURVEY['kms']['key'].values():
+            return tuple(pages)
+
         keys: list[str] = [
             i.id
             for i in SURVEY['kms']['key'].values()
             if i.context == self.context
-            and i.data.KeyManager == 'CUSTOMER'  # type:ignore
-            and i.data.Origin == 'AWS_KMS'  # type:ignore
+            and i.KeyManager == 'CUSTOMER'  # type:ignore
+            and i.Origin == 'AWS_KMS'  # type:ignore
         ]
 
         ## return a single page with multiple results
-        pages: list[dict[str, Any]] = []
         page: dict[str, list[dict[str, str]]] = {"KeyRotation": []}
 
         pager_results = dict(

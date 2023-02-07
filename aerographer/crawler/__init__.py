@@ -77,7 +77,7 @@ def get_crawlers(
     # format services and skip names properly to further use
     services = set(
         f'{MODULE_NAME}.service.{service}'
-        if not service.startswith(f'{MODULE_NAME}.service.')
+        if not service.startswith(f'{MODULE_NAME}.service')
         else service
         for service in services
     )

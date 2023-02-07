@@ -58,6 +58,11 @@ class RecordSetPaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        pages: list[dict[str, Any]] = []
+
+        if not SURVEY['route53']['hosted_zone'].values():
+            return tuple(pages)
+
         zones: list[str] = [
             i.id
             for i in SURVEY['route53']['hosted_zone'].values()
@@ -65,7 +70,6 @@ class RecordSetPaginator(GenericCustomPaginator):
         ]
 
         ## return a single page with multiple results
-        pages: list[dict[str, Any]] = []
         page: dict[str, list[dict[str, str]]] = {'ResourceRecordSets': []}
 
         page_results: dict[str, list[dict[str, Any]]] = dict(
