@@ -261,7 +261,7 @@ class GenericCrawler:
         eval_result = eval_func()
         if not isinstance(eval_result, Result):
             raise EvaluationMethodResultOutputError(
-                f'{evaluation} returned {type(eval_result)}. Must return {type(Result)}.'
+                f'"{evaluation}" returned {type(eval_result)}. Must return {Result}.'
             )
 
         self.results.append((eval_func.__name__, eval_result))

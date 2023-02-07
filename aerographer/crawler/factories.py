@@ -224,7 +224,7 @@ def apply_external_evaluations(evaluations: list[str]) -> None:
             logger.warning(err)
 
     for service in [
-        f'{service}.{resource}'
+        f'{MODULE_NAME}.service.{service}.{resource}'
         for service, resources in external_evalutations.items()
         for resource in resources
     ]:
