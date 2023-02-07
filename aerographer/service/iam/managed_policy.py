@@ -13,4 +13,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""aws managed policy resource."""
+"""aws managed policy resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "Policies",
+    "idAttribute": "PolicyName",
+    "paginator": "list_policies",
+    "page_marker": None,
+    "scanParameters": {"Scope": "AWS"},
+    "responseSchema": {
+        "PolicyName": str,
+        "PolicyId": str,
+        "Arn": str,
+        "Path": str,
+        "DefaultVersionId": str,
+        "AttachmentCount": int,
+        "PermissionsBoundaryUsageCount": int,
+        "IsAttachable": bool,
+        "Description": str,
+        "CreateDate": str,
+        "UpdateDate": str,
+        "Tags": [{"Key": str, "Value": str}],
+    },
+}

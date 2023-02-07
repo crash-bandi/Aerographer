@@ -28,13 +28,16 @@ from aerographer.crawler import get_crawlers, deploy_crawlers
 from aerographer.crawler.generic import GenericCustomPaginator
 
 
+SERVICE_DEFINITION = {'globalService': True}
+
+
 class RolePaginator(GenericCustomPaginator):
     """Paginator for Role resource.
 
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-       INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+       INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
        context (CONTEXT): Which context to use for retrieving data.
        paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -95,7 +98,7 @@ class RolePolicyIdPaginator(GenericCustomPaginator):
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-       INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+       INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
        context (CONTEXT): Which context to use for retrieving data.
        paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -103,7 +106,7 @@ class RolePolicyIdPaginator(GenericCustomPaginator):
        paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['iam.role']
+    INCLUDE = {'iam.role'}
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.
@@ -155,7 +158,7 @@ class RolePolicyPaginator(GenericCustomPaginator):
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-       INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+       INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
        context (CONTEXT): Which context to use for retrieving data.
        paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -163,7 +166,7 @@ class RolePolicyPaginator(GenericCustomPaginator):
        paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['iam.role_policy_id']
+    INCLUDE = {'iam.role_policy_id'}
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.
@@ -222,7 +225,7 @@ class RoleAttachedPolicyPaginator(GenericCustomPaginator):
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-       INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+       INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
        context (CONTEXT): Which context to use for retrieving data.
        paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -230,7 +233,7 @@ class RoleAttachedPolicyPaginator(GenericCustomPaginator):
        paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['iam.role']
+    INCLUDE = {'iam.role'}
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.
@@ -281,7 +284,7 @@ class PolicyDocumentPaginator(GenericCustomPaginator):
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-       INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+       INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
        context (CONTEXT): Which context to use for retrieving data.
        paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -289,7 +292,7 @@ class PolicyDocumentPaginator(GenericCustomPaginator):
        paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['iam.policy']
+    INCLUDE = {'iam.policy'}
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.
@@ -360,7 +363,7 @@ class ManagedPolicyDocumentPaginator(GenericCustomPaginator):
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-       INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+       INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
        context (CONTEXT): Which context to use for retrieving data.
        paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -368,7 +371,7 @@ class ManagedPolicyDocumentPaginator(GenericCustomPaginator):
        paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['iam.managed_policy']
+    INCLUDE = {'iam.managed_policy'}
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.

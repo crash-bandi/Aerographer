@@ -13,4 +13,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""parameter resource."""
+"""parameter resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+RESOURCE_DEFINITION = {
+    "resourceType": "Parameters",
+    "idAttribute": "Name",
+    "paginator": "describe_parameters",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "Name": str,
+        "Type": str,
+        "KeyId": str,
+        "LastModifiedDate": str,
+        "LastModifiedUser": str,
+        "Description": str,
+        "AllowedPattern": str,
+        "Version": int,
+        "Tier": str,
+        "Policies": [{"PolicyText": str, "PolicyType": str, "PolicyStatus": str}],
+        "DataType": str,
+    },
+}

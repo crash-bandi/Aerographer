@@ -13,4 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""key_rotation resource."""
+"""key_rotation resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "KeyRotation",
+    "idAttribute": "KeyId",
+    "paginator": "get_key_rotation_status",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {"KeyId": str, "KeyRotationEnabled": bool},
+}

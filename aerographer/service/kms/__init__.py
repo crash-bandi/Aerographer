@@ -25,13 +25,16 @@ from aerographer.crawler import get_crawlers, deploy_crawlers
 from aerographer.crawler.generic import GenericCustomPaginator
 
 
+SERVICE_DEFINITION = {'globalService': False}
+
+
 class KeyPaginator(GenericCustomPaginator):
     """Paginator for KeyMetadata resource.
 
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-        INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+        INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
         context (CONTEXT): Which context to use for retrieving data.
         paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -39,7 +42,7 @@ class KeyPaginator(GenericCustomPaginator):
         paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['kms.key_id']
+    INCLUDE = {'kms.key_id'}
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.
@@ -79,7 +82,7 @@ class KeyRotationPaginator(GenericCustomPaginator):
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-       INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+       INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
        context (CONTEXT): Which context to use for retrieving data.
        paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -87,7 +90,7 @@ class KeyRotationPaginator(GenericCustomPaginator):
        paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['kms.key']
+    INCLUDE = {'kms.key'}
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.

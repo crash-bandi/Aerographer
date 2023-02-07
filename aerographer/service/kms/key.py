@@ -13,4 +13,44 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""key_metadata resource."""
+"""key_metadata resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "KeyMetadata",
+    "idAttribute": "KeyId",
+    "paginator": "describe_key",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "AWSAccountId": str,
+        "KeyId": str,
+        "Arn": str,
+        "CreationDate": str,
+        "Enabled": bool,
+        "Description": str,
+        "KeyUsage": str,
+        "KeyState": str,
+        "DeletionDate": str,
+        "ValidTo": str,
+        "Origin": str,
+        "CustomKeyStoreId": str,
+        "CloudHsmClusterId": str,
+        "ExpirationModel": str,
+        "KeyManager": str,
+        "CustomerMasterKeySpec": str,
+        "KeySpec": str,
+        "EncryptionAlgorithms": [str],
+        "SigningAlgorithms": [str],
+        "MultiRegion": bool,
+        "MultiRegionConfiguration": {
+            "MultiRegionKeyType": str,
+            "PrimaryKey": {"Arn": str, "Region": str},
+            "ReplicaKeys": [{"Arn": str, "Region": str}],
+        },
+        "PendingDeletionWindowInDays": int,
+        "MacAlgorithms": [str],
+    },
+}

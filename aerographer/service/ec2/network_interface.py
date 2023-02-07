@@ -13,4 +13,75 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""network_interface resource."""
+"""network_interface resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "NetworkInterfaces",
+    "idAttribute": "NetworkInterfaceId",
+    "paginator": "describe_network_interfaces",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "Association": {
+            "AllocationId": str,
+            "AssociationId": str,
+            "IpOwnerId": str,
+            "PublicDnsName": str,
+            "PublicIp": str,
+            "CustomerOwnedIp": str,
+            "CarrierIp": str,
+        },
+        "Attachment": {
+            "AttachTime": str,
+            "AttachmentId": str,
+            "DeleteOnTermination": bool,
+            "DeviceIndex": int,
+            "NetworkCardIndex": int,
+            "InstanceId": str,
+            "InstanceOwnerId": str,
+            "Status": str,
+        },
+        "AvailabilityZone": str,
+        "Description": str,
+        "Groups": [{"GroupName": str, "GroupId": str}],
+        "InterfaceType": str,
+        "Ipv6Addresses": [{"Ipv6Address": str}],
+        "MacAddress": str,
+        "NetworkInterfaceId": str,
+        "OutpostArn": str,
+        "OwnerId": str,
+        "PrivateDnsName": str,
+        "PrivateIpAddress": str,
+        "PrivateIpAddresses": [
+            {
+                "Association": {
+                    "AllocationId": str,
+                    "AssociationId": str,
+                    "IpOwnerId": str,
+                    "PublicDnsName": str,
+                    "PublicIp": str,
+                    "CustomerOwnedIp": str,
+                    "CarrierIp": str,
+                },
+                "Primary": bool,
+                "PrivateDnsName": str,
+                "PrivateIpAddress": str,
+            }
+        ],
+        "Ipv4Prefixes": [{"Ipv4Prefix": str}],
+        "Ipv6Prefixes": [{"Ipv6Prefix": str}],
+        "RequesterId": str,
+        "RequesterManaged": bool,
+        "SourceDestCheck": bool,
+        "Status": "available",
+        "SubnetId": str,
+        "TagSet": [{"Key": str, "Value": str}],
+        "VpcId": str,
+        "DenyAllIgwTraffic": bool,
+        "Ipv6Native": bool,
+        "Ipv6Address": str,
+    },
+}

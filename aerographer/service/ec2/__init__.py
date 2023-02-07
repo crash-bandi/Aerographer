@@ -23,6 +23,9 @@ from aerographer.scan.parallel import async_paginate
 from aerographer.crawler.generic import GenericCustomPaginator
 
 
+SERVICE_DEFINITION = {'globalService': False}
+
+
 class InstancePaginator(GenericCustomPaginator):
     """Paginator for instance resource.
 

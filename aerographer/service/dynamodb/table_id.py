@@ -13,4 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""table_id resource."""
+"""table_id resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "TableNames",
+    "idAttribute": "TableId",
+    "paginator": "list_tables",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {"TableId": str},
+}

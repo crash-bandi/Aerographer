@@ -19,10 +19,13 @@ Contains any customer paginators for service.
 """
 
 from typing import Any
-from aerographer.scan import SURVEY
+from aerographer.crawler import SURVEY
 from aerographer.scan.parallel import async_paginate
 from aerographer.crawler import get_crawlers, deploy_crawlers
 from aerographer.crawler.generic import GenericCustomPaginator
+
+
+SERVICE_DEFINITION = {'globalService': False}
 
 
 class TableIdPaginator(GenericCustomPaginator):
@@ -31,7 +34,7 @@ class TableIdPaginator(GenericCustomPaginator):
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-        INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+        INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
         context (CONTEXT): Which context to use for retrieving data.
         paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -71,7 +74,7 @@ class TablePaginator(GenericCustomPaginator):
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-        INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+        INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
         context (CONTEXT): Which context to use for retrieving data.
         paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -79,7 +82,7 @@ class TablePaginator(GenericCustomPaginator):
         paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['dynamodb.table_id']
+    INCLUDE = {'dynamodb.table_id'}
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.

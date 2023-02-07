@@ -29,7 +29,7 @@ class PaginateWrapper:
     def paginate(self, **kwargs: Any) -> Generator[dict[str, Any], Any, Any]: ...
 
 class GenericCustomPaginator(ABC):
-    INCLUDE: list[str]
+    INCLUDE: set[str]
     context: CONTEXT
     paginate_func_name: str
     _paginate_func: Callable[..., Any]
@@ -39,13 +39,13 @@ class GenericCustomPaginator(ABC):
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]: ...
 
 class GenericMetadata(Protocol):
-    __dataclass_fields__: dict[Any, Any]
+    __dataclass_fields__: dict[str, Any]
 
 class GenericCrawler:
     state: str
     evaluations: tuple[str, ...]
-    custom_paginator: Callable[..., Any]
-    INCLUDE: list[str]
+    custom_paginator: GenericCustomPaginator
+    INCLUDE: set[str]
     serviceType: str
     resourceType: str
     resourceName: str
@@ -53,13 +53,12 @@ class GenericCrawler:
     page_marker: str
     scanParameters: dict[str, Any]
     idAttribute: str
-    data: GenericMetadata
     context: CONTEXT
     id: str
-    iac_id: str
     results: list[tuple[str, str, bool]]
     passed: bool
     __name__: str
+    __metadata__: GenericMetadata
 
     def __init__(self, context: CONTEXT, metadata: dict[str, Any]) -> None: ...
     def _set_id(self) -> None: ...
@@ -80,3 +79,4 @@ class GenericCrawler:
     def asdict(self) -> dict: ...
     def asjson(self) -> str: ...
     def __eq__(self, __o: object) -> bool: ...
+    def __getattr__(self, __attr) -> GenericMetadata:...

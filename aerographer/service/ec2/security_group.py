@@ -13,4 +13,65 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""security_group resource."""
+"""security_group resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "SecurityGroups",
+    "idAttribute": "GroupId",
+    "paginator": "describe_security_groups",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "Description": str,
+        "GroupName": str,
+        "IpPermissions": [
+            {
+                "FromPort": int,
+                "IpProtocol": str,
+                "IpRanges": [{"CidrIp": str, "Description": str}],
+                "Ipv6Ranges": [{"CidrIpv6": str, "Description": str}],
+                "PrefixListIds": [{"Description": str, "PrefixListId": str}],
+                "ToPort": int,
+                "UserIdGroupPairs": [
+                    {
+                        "Description": str,
+                        "GroupId": str,
+                        "GroupName": str,
+                        "PeeringStatus": str,
+                        "UserId": str,
+                        "VpcId": str,
+                        "VpcPeeringConnectionId": str,
+                    }
+                ],
+            }
+        ],
+        "OwnerId": str,
+        "GroupId": str,
+        "IpPermissionsEgress": [
+            {
+                "FromPort": int,
+                "IpProtocol": str,
+                "IpRanges": [{"CidrIp": str, "Description": str}],
+                "Ipv6Ranges": [{"CidrIpv6": str, "Description": str}],
+                "PrefixListIds": [{"Description": str, "PrefixListId": str}],
+                "ToPort": int,
+                "UserIdGroupPairs": [
+                    {
+                        "Description": str,
+                        "GroupId": str,
+                        "GroupName": str,
+                        "PeeringStatus": str,
+                        "UserId": str,
+                        "VpcId": str,
+                        "VpcPeeringConnectionId": str,
+                    }
+                ],
+            }
+        ],
+        "Tags": [{"Key": str, "Value": str}],
+        "VpcId": str,
+    },
+}

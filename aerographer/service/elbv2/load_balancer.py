@@ -13,4 +13,44 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""load_balancer resource."""
+"""load_balancer resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "LoadBalancers",
+    "idAttribute": "LoadBalancerName",
+    "paginator": "describe_load_balancers",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "LoadBalancerArn": str,
+        "DNSName": str,
+        "CanonicalHostedZoneId": str,
+        "CreatedTime": str,
+        "LoadBalancerName": str,
+        "Scheme": str,
+        "VpcId": str,
+        "State": {"Code": str, "Reason": str},
+        "Type": str,
+        "AvailabilityZones": [
+            {
+                "ZoneName": str,
+                "SubnetId": str,
+                "OutpostId": str,
+                "LoadBalancerAddresses": [
+                    {
+                        "IpAddress": str,
+                        "AllocationId": str,
+                        "PrivateIPv4Address": str,
+                        "IPv6Address": str,
+                    }
+                ],
+            }
+        ],
+        "SecurityGroups": [str],
+        "IpAddressType": str,
+        "CustomerOwnedIpv4Pool": str,
+    },
+}

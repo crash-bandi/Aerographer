@@ -13,4 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""tag resource."""
+"""tag resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "TagDescriptions",
+    "idAttribute": "ResourceArn",
+    "paginator": "describe_tags",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {"ResourceArn": str, "Tags": [{"Key": str, "Value": str}]},
+}

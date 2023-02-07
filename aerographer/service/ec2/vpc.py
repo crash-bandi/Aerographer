@@ -13,4 +13,41 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""vpc resource."""
+"""vpc resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "Vpcs",
+    "idAttribute": "VpcId",
+    "paginator": "describe_vpcs",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "CidrBlock": str,
+        "DhcpOptionsId": str,
+        "State": str,
+        "VpcId": str,
+        "OwnerId": str,
+        "InstanceTenancy": str,
+        "Ipv6CidrBlockAssociationSet": [
+            {
+                "AssociationId": str,
+                "Ipv6CidrBlock": str,
+                "Ipv6CidrBlockState": {"State": str, "StatusMessage": str},
+                "NetworkBorderGroup": str,
+                "Ipv6Pool": str,
+            }
+        ],
+        "CidrBlockAssociationSet": [
+            {
+                "AssociationId": str,
+                "CidrBlock": str,
+                "CidrBlockState": {"State": str, "StatusMessage": str},
+            }
+        ],
+        "IsDefault": bool,
+        "Tags": [{"Key": str, "Value": str}],
+    },
+}

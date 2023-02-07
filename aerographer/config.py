@@ -19,8 +19,8 @@ Central location for global configuration values.
 """
 
 import os
-import pathlib
 import json
+from pathlib import Path
 from typing import Any
 
 
@@ -42,26 +42,19 @@ def separate(text: str | None, delimiter: str = ',') -> list[str | None]:
     return [s.strip() for s in text.split(sep=delimiter)]
 
 
-# internal properties
-MODULE_PATH: str = str(pathlib.Path(__file__).parent.absolute())
-# legacy -- MODULE_PATH: str = __loader__.path.replace('\\', '/').rsplit('/', 1)[0]
-
-# external properties
-LOGGING_LEVEL: str = os.getenv('AG_LOGGING_LEVEL', 'none')
+LOGGING_LEVEL: str = os.getenv('AG_LOGGING_LEVEL', 'warn')
 PROFILES: list[str | None] = separate(os.getenv('AG_AWS_PROFILES', None))
 ROLES: list[str | None] = separate(os.getenv('AG_AWS_ROLES', None))
 REGIONS: list[str | None] = separate(
     os.getenv('AG_AWS_REGIONS', os.getenv('AWS_REGION', None))
 )
-SERVICE_DEFINITIONS_CONFIG: str = os.getenv(
-    'AG_SERVICE_DEFINITIONS', f"{MODULE_PATH}/service_definitions.json"
-)
+
+# internal properties
+MODULE_NAME = __name__.split('.', maxsplit=1)[0]
+MODULE_PATH: str = str(Path(__file__).parent.absolute())
+
 ACCOUNTS: list[dict[str, Any]] = [
     {'profile': profile, 'regions': REGIONS, 'role': role}
     for profile in PROFILES
     for role in ROLES
 ]
-
-
-with open(SERVICE_DEFINITIONS_CONFIG, 'r', encoding="utf-8") as f:
-    SERVICE_DEFINITIONS: dict[str, Any] = json.load(f)

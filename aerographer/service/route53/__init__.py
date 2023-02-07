@@ -25,13 +25,16 @@ from aerographer.crawler import get_crawlers, deploy_crawlers
 from aerographer.crawler.generic import GenericCustomPaginator
 
 
+SERVICE_DEFINITION = {'globalService': True}
+
+
 class RecordSetPaginator(GenericCustomPaginator):
     """Paginator for Record Set resource.
 
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-        INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+        INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
         context (CONTEXT): Which context to use for retrieving data.
         paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -39,7 +42,7 @@ class RecordSetPaginator(GenericCustomPaginator):
         paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['route53.hosted_zone']
+    INCLUDE = {'route53.hosted_zone'}
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.

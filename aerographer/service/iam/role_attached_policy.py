@@ -13,4 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""role attached policy resource."""
+"""role attached policy resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "AttachedPolicies",
+    "idAttribute": "PolicyName",
+    "paginator": "list_attached_role_policies",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {"RoleName": str, "PolicyName": str, "PolicyArn": str},
+}

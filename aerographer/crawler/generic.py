@@ -31,7 +31,6 @@ import aerographer.scan as scan
 from aerographer.scan.context import CONTEXT
 from aerographer.scan.parallel import asyncify, async_paginate
 from aerographer.evaluations import Result
-from aerographer.whiteboard import WHITEBOARD
 from aerographer.logger import logger
 from aerographer.exceptions import (
     ActiveCrawlerScanExceptionError,
@@ -39,6 +38,7 @@ from aerographer.exceptions import (
     PaginatorNotFoundExecptionError,
     MetadataClassNotFoundExecptionError,
     EvaluationMethodNotFoundError,
+    EvaluationMethodResultOutputError,
 )
 
 
@@ -107,7 +107,7 @@ class GenericCustomPaginator:
 
 
     Attributes:
-        INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+        INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
         context (CONTEXT): Which context to use for retrieving data.
         paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -115,7 +115,7 @@ class GenericCustomPaginator:
         paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE: list[str] = []
+    INCLUDE: set[str] = set()
 
     def __init__(
         self, context: CONTEXT, paginator_func_name: str, page_marker: str
@@ -131,6 +131,10 @@ class GenericCustomPaginator:
                 self._paginate_func.__name__
             )
         except OperationNotPageableError:
+            logger.trace(  # type: ignore
+                'No native support for %s pagination, applying PaginateWrapper.',
+                paginator_func_name,
+            )
             self.paginator: PaginateWrapper = PaginateWrapper(  # type: ignore
                 func=getattr(context.client, paginator_func_name),
                 page_marker=self.page_marker,
@@ -156,7 +160,7 @@ class GenericMetadata(Protocol):
 
     # checking for this attribute is currently the most reliable way
     # to ascertain that something is a dataclass
-    __dataclass_fields__: dict[Any, Any]
+    __dataclass_fields__: dict[str, Any]
 
 
 class GenericCrawler:
@@ -176,7 +180,7 @@ class GenericCrawler:
             or `complete` (scan complete).
         evaluations (tuple): List of evlaution method names.
         custom_paginator (Callable): Custom pagintaor class.
-        INCLUDE (list[str]): List of resources that evaluations depend on.
+        INCLUDE (set[str]): List of resources that evaluations depend on.
         serviceType (str): Name of target service.
         resourceType (str): Resource data identifier in scan pages.
         resourceName (str): Name of target resource.
@@ -190,9 +194,9 @@ class GenericCrawler:
     """
 
     state: str = 'initialized'
-    evaluations: tuple[str, ...]
-    custom_paginator: Callable[..., Any] | None = None
-    INCLUDE: list[str] = []
+    evaluations: tuple[str, ...] = ()
+    custom_paginator: GenericCustomPaginator | None = None
+    INCLUDE: set[str] = set()
 
     # attributes set from service definitions
     globalService: bool
@@ -205,12 +209,11 @@ class GenericCrawler:
     idAttribute: str
 
     def __init__(self, context: CONTEXT, metadata: dict[str, Any]) -> None:
-        self.data = self._build_metadata(metadata=metadata)
+        self.__metadata__ = self._build_metadata(metadata=metadata)
         self.context = context
-        self.results: list[tuple[str, str, bool]] = []
+        self.results: list[tuple[str, Result]] = []
 
         self._set_id()
-        self._set_infrastructure_as_code_id()
 
     def _set_id(self) -> None:
         """Set unique Id of class instance.
@@ -220,49 +223,13 @@ class GenericCrawler:
         """
 
         self.id: str = getattr(
-            self.data, self.idAttribute, ''
+            self.__metadata__, self.idAttribute, ''
         )  # pylint: disable=invalid-name
-
-    def _set_infrastructure_as_code_id(self) -> None:
-        """Set infrastructure as code Id of class instance.
-
-        Retrieves infrastructure as code id from scan tag data and
-        assigned as class iac_id attribute. Empty string assigned if
-        no value is found.
-        """
-
-        iac_id: str = ''
-        try:
-            iac_id = next(
-                (
-                    tag.Value  # type: ignore
-                    for tag in self.data.Tags  # type: ignore
-                    if tag.Key == 'aws:cloudformation:stack-id'  # type: ignore
-                ),
-                '',
-            )
-        except AttributeError:
-            try:
-                iac_id = next(
-                    (
-                        tag.Value  # type: ignore
-                        for tag in self.data.TagSet  # type: ignore
-                        if tag.Key == 'aws:cloudformation:stack-id'  # type: ignore
-                    ),
-                    '',
-                )
-            except AttributeError:
-                pass
-                logger.trace(  # type: ignore
-                    'no iac id found for %s.%s', self.__class__.__name__, self.id
-                )
-
-        self.iac_id: str = iac_id
 
     @property
     def passed(self) -> bool:
         """Returns if all evaluations passed."""
-        return all(result[2] for result in self.results)
+        return all(result[1].status for result in self.results)
 
     def evaluate(self, evaluation: str) -> bool:
         """Run class evaluation methods.
@@ -277,6 +244,11 @@ class GenericCrawler:
             bool: status of evaluation
         """
 
+        # return status if evaluation already run
+        for result in self.results:
+            if result[0] == evaluation:
+                return result[1].status
+
         # try to get requested evaluation function
         try:
             eval_func: Callable[..., Any] = getattr(self, evaluation)
@@ -285,22 +257,14 @@ class GenericCrawler:
                 f'{evaluation} is not a valid evaluation name for {self.__class__.__name__}'
             ) from err
 
-        # return status if evaluation already run
-        for result in self.results:
-            if result[0] == evaluation:
-                return result[2]
-
-        # run evlaution and record result if returned Result object
+        # run evlaution and record result
         eval_result = eval_func()
-        if isinstance(eval_result, Result):
-            self.results.append(
-                (eval_func.__name__, eval_result.message, eval_result.status)
+        if not isinstance(eval_result, Result):
+            raise EvaluationMethodResultOutputError(
+                f'{evaluation} returned {type(eval_result)}. Must return {type(Result)}.'
             )
-            WHITEBOARD.write(
-                section='evaluations',
-                title=f'{eval_func.__name__}:{self.id}',
-                msg={'finding': eval_result.message, 'passed': eval_result.status},
-            )
+
+        self.results.append((eval_func.__name__, eval_result))
 
         # return evalutions status
         return eval_result.status
@@ -312,6 +276,12 @@ class GenericCrawler:
         writes result to whiteboard.
         """
         for evaluation in self.evaluations:
+            logger.debug(
+                'Running evalution %s on %s.%s',
+                evaluation,
+                self.__class__.__name__,
+                self.id,
+            )
             self.evaluate(evaluation=evaluation)
 
     def _build_metadata(
@@ -336,7 +306,18 @@ class GenericCrawler:
         elif isinstance(metadata, dict):
             for k, v in metadata.items():  # pylint: disable=invalid-name
                 metadata[k] = self._build_metadata(v, path + k.capitalize())
-            return self._get_metadata_class(path)(**metadata)  # type: ignore
+            metadata_class = self._get_metadata_class(path)
+            # Find any discrepencies between metadata cls and scan data. Report and remove missing attributes.
+            for missing_attr in [
+                attr
+                for attr in metadata.keys()
+                if attr not in metadata_class.__dataclass_fields__
+            ]:
+                logger.warn(
+                    f'{metadata_class.__name__} received unexpected attribute: {missing_attr}'  # type: ignore
+                )
+                del metadata[missing_attr]
+            return metadata_class(**metadata)  # type: ignore[operator]
         else:
             return metadata
 
@@ -386,12 +367,16 @@ class GenericCrawler:
 
         try:
             if cls.custom_paginator is not None:
-                return cls.custom_paginator(  # pylint: disable=not-callable
+                logger.trace(  # type: ignore
+                    'Found custom paginator %s.', cls.custom_paginator.__name__  # type: ignore
+                )
+                return cls.custom_paginator(  # type: ignore[operator]
                     context=context,
-                    paginator_func_name=cls.paginator,  # pylint: disable=not-callable
+                    paginator_func_name=cls.paginator,
                     page_marker=cls.page_marker,
                 )
 
+            logger.trace('Generating generic plaginator.')  # type: ignore[attr-defined]
             return GenericCustomPaginator(
                 context=context,
                 paginator_func_name=cls.paginator,
@@ -429,7 +414,7 @@ class GenericCrawler:
                 cls.__name__,
                 context.name,
                 paginator.paginate.__name__,
-            )
+            )  # type: ignore
             pages: Iterable[dict[str, Any]] = await asyncify(
                 paginator.paginate, **cls.scanParameters
             )
@@ -472,6 +457,10 @@ class GenericCrawler:
         elif cls.state == 'complete':
             return
 
+        # mark scan as active
+        cls.state = 'active'
+        logger.info('Scanning %s:%s...', cls.serviceType, cls.resourceName)
+
         # make sure SURVEY has proper data structure present
         if cls.serviceType not in scan.SURVEY:
             scan.SURVEY[cls.serviceType] = {}
@@ -479,12 +468,7 @@ class GenericCrawler:
         if cls.resourceName not in scan.SURVEY[cls.serviceType]:
             scan.SURVEY[cls.serviceType][cls.resourceName] = {}
 
-        # mark scan as active
-        cls.state = 'active'
-        logger.info('Scanning %s:%s...', cls.serviceType, cls.resourceName)
-
         contexts = tuple([scan.CONTEXTS[0]]) if cls.globalService else scan.CONTEXTS
-        print(contexts)
 
         await asyncio.gather(
             *(
@@ -509,7 +493,6 @@ class GenericCrawler:
 
         data = {
             'id': self.id,
-            'iac_id': self.iac_id,
             'service': self.serviceType,
             'resource': self.resourceType,
             'passed': self.passed,
@@ -519,7 +502,7 @@ class GenericCrawler:
                 'region': self.context.region,
                 'session': self.context.service,
             },
-            'data': asdict(self.data),
+            'data': asdict(self.__metadata__),
         }
 
         return data
@@ -539,3 +522,11 @@ class GenericCrawler:
         if isinstance(__o, GenericCrawler):
             return __o.id == self.id
         return str(__o) == self.id
+
+    def __getattr__(self, __attr) -> GenericMetadata:
+        try:
+            return getattr(self.__metadata__, __attr)
+        except AttributeError:
+            raise AttributeError(
+                f"'{self.__class__.__name__}' object has no attribute '{__attr}'"
+            ) from None

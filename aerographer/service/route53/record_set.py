@@ -13,4 +13,41 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""record set resource."""
+"""record set resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "ResourceRecordSets",
+    "idAttribute": "Id",
+    "paginator": "list_resource_record_sets",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "Name": str,
+        "Id": str,
+        "HostedZoneId": str,
+        "Type": str,
+        "SetIdentifier": str,
+        "Weight": int,
+        "Region": str,
+        "GeoLocation": {
+            "ContinentCode": str,
+            "CountryCode": str,
+            "SubdivisionCode": str,
+        },
+        "Failover": str,
+        "MultiValueAnswer": bool,
+        "TTL": int,
+        "ResourceRecords": [{"Value": str}],
+        "AliasTarget": {
+            "HostedZoneId": str,
+            "DNSName": str,
+            "EvaluateTargetHealth": bool,
+        },
+        "HealthCheckId": str,
+        "TrafficPolicyInstanceId": str,
+        "CidrRoutingConfig": {"CollectionId": str, "LocationName": str},
+    },
+}

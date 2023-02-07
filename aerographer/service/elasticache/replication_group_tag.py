@@ -13,4 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""replication_group_tag resource."""
+"""replication_group_tag resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "TagList",
+    "idAttribute": "ReplicationGroupId",
+    "paginator": "list_tags_for_resource",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {"ReplicationGroupId": str, "Key": str, "Value": str},
+}

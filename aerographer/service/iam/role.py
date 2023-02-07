@@ -13,4 +13,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""role resource."""
+"""role resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "Roles",
+    "idAttribute": "RoleName",
+    "paginator": "list_roles",
+    "page_marker": "Marker",
+    "scanParameters": {},
+    "responseSchema": {
+        "Path": str,
+        "RoleName": str,
+        "RoleId": str,
+        "Arn": str,
+        "CreateDate": str,
+        "AssumeRolePolicyDocument": str,
+        "Description": str,
+        "MaxSessionDuration": int,
+        "PermissionsBoundary": {
+            "PermissionsBoundaryType": str,
+            "PermissionsBoundaryArn": str,
+        },
+        "Tags": [{"Key": str, "Value": str}],
+        "RoleLastUsed": {"LastUsedDate": str, "Region": str},
+    },
+}

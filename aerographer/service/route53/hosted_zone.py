@@ -13,4 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""hosted zone resource."""
+"""hosted zone resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "HostedZones",
+    "idAttribute": "Id",
+    "paginator": "list_hosted_zones",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "Id": str,
+        "Name": str,
+        "CallerReference": str,
+        "Config": {"Comment": str, "PrivateZone": bool},
+        "ResourceRecordSetCount": int,
+        "LinkedService": {"ServicePrincipal": str, "Description": str},
+    },
+}
