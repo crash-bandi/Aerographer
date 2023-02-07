@@ -39,6 +39,7 @@ from aerographer.exceptions import (
     MetadataClassNotFoundExecptionError,
     EvaluationMethodNotFoundError,
     EvaluationMethodResultOutputError,
+    FrozenInstanceError,
 )
 
 
@@ -194,6 +195,7 @@ class GenericCrawler:
     """
 
     state: str = 'initialized'
+    _frozen: bool = False
     evaluations: tuple[str, ...] = ()
     custom_paginator: GenericCustomPaginator | None = None
     INCLUDE: set[str] = set()
@@ -214,6 +216,7 @@ class GenericCrawler:
         self.results: list[tuple[str, Result]] = []
 
         self._set_id()
+        self._frozen = True
 
     def _set_id(self) -> None:
         """Set unique Id of class instance.
@@ -522,6 +525,16 @@ class GenericCrawler:
         if isinstance(__o, GenericCrawler):
             return __o.id == self.id
         return str(__o) == self.id
+
+    def __delattr__(self, *args, **kwargs):
+        if self._frozen:
+            raise FrozenInstanceError(f"cannot delete field '{args[0]}'")
+        object.__delattr__(self, *args, **kwargs)
+
+    def __setattr__(self, *args, **kwargs):
+        if self._frozen:
+            raise FrozenInstanceError(f"cannot assign to field '{args[0]}'")
+        object.__setattr__(self, *args, **kwargs)
 
     def __getattr__(self, __attr) -> GenericMetadata:
         try:

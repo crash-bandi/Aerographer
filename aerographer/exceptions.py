@@ -71,5 +71,5 @@ class TimeOutCrawlerScanExceptionError(Exception):
     """Crawler scan timeout encountered."""
 
 
-class CrawlerScanUnexpectedDataExceptionError(Exception):
-    """Crawler scan unexpecte data encountered."""
+class FrozenInstanceError(Exception):
+    """Frozen crawler setattr encountered."""
