@@ -17,7 +17,7 @@ limitations under the License.
 
 Contains the functions required to establish, track, and
 distribute sessions with the target AWS accounts for
-scanning. Also contains the `SURVEY` data
+scanning. Also contains the `scan_results` data
 structure where all data retrived by the web crawlers
 is stored. Not meant for external use.
 """
@@ -38,7 +38,7 @@ from aerographer.logger import logger
 from aerographer.config import ACCOUNTS
 
 
-SURVEY: dict[str, Any] = {}
+scan_results: dict[str, Any] = {}
 CONTEXTS: tuple[CONTEXT, ...]
 
 

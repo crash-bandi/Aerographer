@@ -336,17 +336,6 @@ def _resource_crawler_class_factory(
         New class.
     """
 
-    # import target module
-    # logger.trace('Importing %s', class_path)
-    # module = importlib.import_module(class_path)
-
-    # if includes are present, format and add to class definition
-    # class_includes = getattr(module, 'INCLUDE', None)
-    # if class_includes:
-    #     class_definition['INCLUDE'] = [
-    #         f'{MODULE_NAME}.service.{i}' for i in class_includes
-    #     ]
-
     # get custom paginator from service module if it exists
     parent_module = importlib.import_module(service_path)
     class_paginator: dict[str, type] = {

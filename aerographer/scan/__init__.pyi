@@ -19,7 +19,7 @@ from typing import Any
 from aerographer.scan.context import SESSION, CONTEXT
 from aerographer.crawler.generic import GenericCrawler
 
-SURVEY: dict[str, dict[str, dict[str, GenericCrawler]]]
+scan_results: dict[str, dict[str, dict[str, GenericCrawler]]]
 CONTEXTS: tuple[CONTEXT, ...]
 
 def _init_session(profile:str, region:str, role:str) -> SESSION: ...

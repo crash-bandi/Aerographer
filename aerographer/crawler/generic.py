@@ -422,14 +422,14 @@ class GenericCrawler:
                 paginator.paginate, **cls.scanParameters
             )
 
-            # create new class instance for each resource found and add to SURVEY
+            # create new class instance for each resource found and add to scan_results
             for resource in (
                 resource for page in pages for resource in page[cls.resourceType]
             ):
                 resource_instance: GenericCrawler = cls(
                     context=context, metadata=resource
                 )
-                scan.SURVEY[cls.serviceType][cls.resourceName].update(
+                scan.scan_results[cls.serviceType][cls.resourceName].update(
                     {resource_instance.id: resource_instance}
                 )
 
@@ -455,21 +455,22 @@ class GenericCrawler:
 
         # make sure scan in not active or complete
         if cls.state == 'active':
-            logger.debug('%s scan already in progress, skipping...', cls.__name__)
+            logger.debug('%s scan already in progress.', cls.__name__)
             raise ActiveCrawlerScanExceptionError
         elif cls.state == 'complete':
+            logger.debug('%s scan already complete.', cls.__name__)
             return
 
         # mark scan as active
         cls.state = 'active'
         logger.info('Scanning %s:%s...', cls.serviceType, cls.resourceName)
 
-        # make sure SURVEY has proper data structure present
-        if cls.serviceType not in scan.SURVEY:
-            scan.SURVEY[cls.serviceType] = {}
+        # make sure scan_results has proper data structure present
+        if cls.serviceType not in scan.scan_results:
+            scan.scan_results[cls.serviceType] = {}
 
-        if cls.resourceName not in scan.SURVEY[cls.serviceType]:
-            scan.SURVEY[cls.serviceType][cls.resourceName] = {}
+        if cls.resourceName not in scan.scan_results[cls.serviceType]:
+            scan.scan_results[cls.serviceType][cls.resourceName] = {}
 
         contexts = tuple([scan.CONTEXTS[0]]) if cls.globalService else scan.CONTEXTS
 
@@ -526,15 +527,15 @@ class GenericCrawler:
             return __o.id == self.id
         return str(__o) == self.id
 
-    def __delattr__(self, *args, **kwargs):
+    def __delattr__(self, __key: str):
         if self._frozen:
-            raise FrozenInstanceError(f"cannot delete field '{args[0]}'")
-        object.__delattr__(self, *args, **kwargs)
+            raise FrozenInstanceError(f"cannot delete field '{__key}'")
+        object.__delattr__(self, __key)
 
-    def __setattr__(self, *args, **kwargs):
+    def __setattr__(self, __key: str, __val: Any):
         if self._frozen:
-            raise FrozenInstanceError(f"cannot assign to field '{args[0]}'")
-        object.__setattr__(self, *args, **kwargs)
+            raise FrozenInstanceError(f"cannot assign to field '{__key}'")
+        object.__setattr__(self, __key, __val)
 
     def __getattr__(self, __attr) -> GenericMetadata:
         try:
@@ -543,3 +544,9 @@ class GenericCrawler:
             raise AttributeError(
                 f"'{self.__class__.__name__}' object has no attribute '{__attr}'"
             ) from None
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.context.account_id}:{self.context.region}:{self.id})'
+
+    def __str__(self):
+        return self.id

@@ -39,7 +39,8 @@ from typing import Any
 
 from botocore.exceptions import ClientError  # type: ignore
 
-from aerographer.scan import build_contexts, SURVEY
+from aerographer.scan import build_contexts, scan_results
+from aerographer.scan.survey import make_survey, FrozenDict
 from aerographer.scan.parallel import async_scan
 from aerographer.crawler.factories import apply_external_evaluations, import_crawlers
 from aerographer.crawler.generic import GenericCrawler
@@ -49,6 +50,8 @@ from aerographer.exceptions import (
     CrawlerNotFoundExecptionError,
     FailedCrawlerScanExceptionError,
 )
+
+SURVEY: type = ''
 
 
 def get_crawlers(
@@ -224,7 +227,7 @@ class Crawler:
             for role in self.roles
         ]
 
-    def scan(self) -> dict[str, Any]:
+    def scan(self) -> type:
         """Performs scan and evaluations of all web crawlers.
 
         Triggers each web crawler to scan target resource and perform any
@@ -264,7 +267,7 @@ class Crawler:
             if crawler.serviceType not in RETURN_COLLECTION:
                 RETURN_COLLECTION[crawler.serviceType] = {}
 
-            RETURN_COLLECTION[crawler.serviceType][crawler.resourceName] = SURVEY[
+            RETURN_COLLECTION[crawler.serviceType][crawler.resourceName] = scan_results[
                 crawler.serviceType
             ][crawler.resourceName]
 
@@ -273,4 +276,7 @@ class Crawler:
             ].values():
                 resource.run_evaluations()
 
-        return RETURN_COLLECTION
+        global SURVEY
+        SURVEY = make_survey(RETURN_COLLECTION)
+
+        return SURVEY

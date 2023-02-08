@@ -19,7 +19,7 @@ Contains any customer paginators for service.
 """
 
 from typing import Any
-from aerographer.scan import SURVEY
+from aerographer.scan import scan_results
 from aerographer.scan.parallel import async_paginate
 from aerographer.crawler import get_crawlers, deploy_crawlers
 from aerographer.crawler.generic import GenericCustomPaginator
@@ -59,7 +59,9 @@ class KeyPaginator(GenericCustomPaginator):
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
         keys: list[str] = [
-            i.id for i in SURVEY['kms']['key_id'].values() if i.context == self.context
+            i.id
+            for i in scan_results['kms']['key_id'].values()
+            if i.context == self.context
         ]
 
         ## return a single page with multiple results
@@ -108,12 +110,12 @@ class KeyRotationPaginator(GenericCustomPaginator):
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
         pages: list[dict[str, Any]] = []
 
-        if not SURVEY['kms']['key'].values():
+        if not scan_results['kms']['key'].values():
             return tuple(pages)
 
         keys: list[str] = [
             i.id
-            for i in SURVEY['kms']['key'].values()
+            for i in scan_results['kms']['key'].values()
             if i.context == self.context
             and i.KeyManager == 'CUSTOMER'  # type:ignore
             and i.Origin == 'AWS_KMS'  # type:ignore

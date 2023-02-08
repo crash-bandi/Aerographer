@@ -76,7 +76,7 @@ RESOURCE_DEFINITION = {
         "RequesterId": str,
         "RequesterManaged": bool,
         "SourceDestCheck": bool,
-        "Status": "available",
+        "Status": str,
         "SubnetId": str,
         "TagSet": [{"Key": str, "Value": str}],
         "VpcId": str,
