@@ -409,6 +409,7 @@ class SurveyResourceType(Freezable):
     """
 
     def __init__(self, resource_type: str) -> None:
+        self.resource_type = resource_type
         self.resources: set[str] = set()
         self._id: str = resource_type
 
@@ -475,6 +476,7 @@ class SurveyService(Freezable):
     """
 
     def __init__(self, service: str) -> None:
+        self.service = service
         self.resource_types: set[str] = set()
         self._id: str = service
 
