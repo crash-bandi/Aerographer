@@ -34,6 +34,7 @@ class Result:
         status (bool): (Optional) If evaluation passed. Default: True
     """
 
+    # TODO: flip attributes so status is first parameter and update readme
     message: str = field(default='')
     status: bool = field(default=True)
 

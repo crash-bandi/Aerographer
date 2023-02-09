@@ -69,31 +69,31 @@ crawler.scan()
 
 # Advanced Usage
 
-The `crawler` class is how aerographer identifies the specific information required for executing the desired scan. It is designed to provide a wide range of flexibility for specifying specific details about how the scan should be performed.
+The `Crawler` class is how aerographer identifies the specific information required for executing the desired scan. It is designed to provide a wide range of flexibility for specifying details about how the scan should be performed.
 
 ## Parameters
 
 ### profiles (Optional)
 
-- What account profiles to scan with. This can be a single profile, or multiple profiles in a comma delimited string if multiple accounts should be scanned at the same time.
+- What account profiles to scan with. This must be a list.
 
 ### regions
 
-- What regions within the specific accounts (profiles) should be scanned. This can be a single region or multiple regions in a comma delimited string if multiple regions should be scanned at the same time.
+- What regions within the specific accounts (profiles) should be scanned. This must be a list.
 
 ### role (Optional)
 
-- What role to assume to scan with. This must only be the **name** of the role, not the entire role ARN. the ARN is generated based on the AWS credentials used. If multiple accounts are being scanned at the same time and role assumption is required, the role in every account must have the same name.
+- What role to assume to scan with. This must be the list of full role ARN's. Take note that a scan wil be ran for every unique profile:role pair.
 
 ### services (Optional)
 
-- What resources will be scanned. This can be either a specific resource, or it can be an entire service. **Default is '\*'.**
+- What resources will be scanned. This can be either a specific resource, or it can be an entire service. Can be string or list. **Default is '[]'**
 
 ```python
 from aerographer.crawler import Crawler
 
 crawler = Crawler(
-    services=["ec2.security_group"], # <--- will only scan security groups.
+    services="ec2.security_group", # <--- will only scan security groups.
     ...
 )
 
@@ -108,7 +108,7 @@ crawler = Crawler(
 )
 
 crawler = Crawler(
-    services=["*"], # <--- will scan all services
+    services=[], # <--- will scan all services
     ...
 )
 ```
@@ -127,7 +127,7 @@ crawler = Crawler(
 )
 
 crawler = Crawler(
-    services=["*"],
+    services=[],
     skip=["ssm", "elb.tag"], # <--- will scan all services except the ssm service and the elb.tag resource.
     ...
 )
@@ -135,7 +135,7 @@ crawler = Crawler(
 
 ### evaluations (Optional)
 
-- The file or module where evalution functions are located. Only items specified in `services` will have their evaluations automatically run, however all resources provided for all `@evalutation include` decorator parameter will be automatically scanned. Therefore it is important to only specify the required evaluations to limit scanned resources to only those required, as unrequired scans can become costly.
+- The file or module where evalution functions are located. Only services specified in `services` will have their evaluations automatically run, however all services provided for all `@evalutation(include=[<services>]` decorator parameters will be automatically scanned. Therefore it is important to only specify the required evaluations to limit scanned resources to only those required, as unrequired scans can extend scan time.
 
 ```python
 from aerographer.crawler import Crawler
@@ -153,70 +153,7 @@ crawler = Crawler(
 
 ---
 
-## WHITEBOARD
-
-The `WHITEBOARD` is an automatically created instance of the `aerographer.whiteboard.Whiteboard` class. It is basic class that allows easy recording and display of data. You may create your own instance of the `Whiteboard` class, however the `WHITEBOARD` instance is what aerographer uses for recording generated data.
-
-A simple message can be recorded using the `scribble` method
-
-```python
-from aerographer.whiteboard import WHITEBOARD
-
-WHITEBOARD.scribble(title='my scribble', msg='important information')
-```
-
-scribbles get written to the scribbles section of the `WHITEBOARD`. You can also create and use your own sections.
-
-```python
-from aerographer.whiteboard import WHITEBOARD
-
-WHITEBOARD.new_section(new_section='my section')
-WHITEBOARD.write(section='my section', title='important', msg='it is looking mightly cloudy out')
-```
-
-Sections and entries can to retrieved and removed as well. It is important to note that anything returned is a copy, not a reference. This means any changes _must_ be written back into the WHITEBOARD. By default, entries cannot be overwritten unless the `overwrite=True` parameter is provided.
-
-```python
-from aerographer.whiteboard import WHITEBOARD
-
-my_section = WHITEBOARD.get_section(section='my section')
-my_message = WHITEBOARD.get(section='my section', title='important')
-
-WHITEBOARD.write(section='my section', title='important', msg='clear skies ahead', overwrite=True)
-
-WHITEBOARD.erase(section='my section', title='important')
-WHITEBOARD.remove_section(section='my section')
-```
-
-You can write any type of data to the `WHITEBOARD`
-
-```python
-from aerographer.whiteboard import WHITEBOARD
-
-info = {
-    'foo': [
-        'bar1',
-        'bar2',
-        'bar3',
-    ]
-    'bob':'bill',
-    'important': True
-}
-
-my_message = WHITEBOARD.write(section='my section', title='important' msg=info)
-```
-
-Calling the `print` function will print out to contents of the `WHITEBOARD`, using `pprint` for attempted asthetically pleasing formatting.
-
-```python
-from aerographer.whiteboard import WHITEBOARD
-
-WHITEBOARD.print()
-```
-
----
-
-## evaluation
+## Evaluation
 
 An evaluation is a function that get automatically applied to the specific resource type, and is automatically run during the `crawler.scan()` process.
 
@@ -234,11 +171,11 @@ Additionally, any scan information from other resources that the evaluation depe
 
 ```python
 from aerographer.evaluations import evaluation, Result
-from aerographer.scan import SURVEY
+from aerographer.survey import SURVEY
 
 @evaluation(service='ec2', resource='security_group', include=['ec2.network_interface'])
 def security_group_check_interface(self) -> Result:
-    if [eni for eni in SURVEY['ec2']['network_interface'].values() for group in eni.data.Groups if self.id == group.GroupId]
+    if SURVEY.ec2.network_interface.get_resources().where('GroupId', 'eq', self.id).get():
         return Result(message='Group applied to interfaces', status=True)
     return Result(message='Group not applied to interfaces', status=False)
 ```
@@ -250,14 +187,14 @@ from aerographer.evaluations import evaluation, Result
 from aerographer.scan import SURVEY
 
 @evaluation(service='ec2', resource='network_interface'):
-def in_use(self) -> bool:
+def in_use(self) -> Result:
     if self.data.Status != 'available':
-        return True
-    return False
+        return Result("", True)
+    return Result("", False)
 
 @evaluation(service='ec2', resource='security_group', include=['ec2.network_interface'])
 def security_group_check_interface(self) -> Result:
-    for eni in [eni for eni in SURVEY['ec2']['network_interface'].values() for group in eni.data.Groups if self.id == group.GroupId]
+    for eni in SURVEY.ec2.network_interface.get_resources().where('Groups.*.GroupId', 'eq', self.id):
         if eni.evaluate('in_use'):
             return Result(message='Group applied to an active interfaces', status=True)
         else:
@@ -269,7 +206,7 @@ def security_group_check_interface(self) -> Result:
 
 ## Result
 
-Returning a `Result` object from an evaluation recorded on the resource instance `results` attribute. They are also automatically inserted as an entry in the `WHITEBOARD`.
+Evaluation functions must return a `Result` object. Evaluation results are recorded on the resource instance `results` attribute.
 
 ```python
 from aerographer.evaluations import evaluation, Result
@@ -289,36 +226,16 @@ A `Result` object is written to the resources's `results` attribute with the for
 ]
 ```
 
-A `Result` is written to the `WHITEBOARD` with the format:
-
-```python
-WHITEBOARD.write(
-    section='evaluations',
-    title=f'{eval_func.__name__}:{self.id}',
-    msg={'finding': result.message, 'passed':result.status}
-)
-```
-
-While an evaluation will function properly if something other than a `Result` is returned, only a returned `Result` object will be automatically recorded.
-
-```python
-from aerographer.evaluations import evaluation
-
-@evaluation(service='ec2', resource='security_group')
-def security_group_evaluation(self) -> bool:
-    ...
-    return True # <--- Will not be automatically recorded
-```
-
 ---
 
 ## SURVEY
 
-The entire scan dataset can be access from the `SURVEY` dictionary
+The entire scan data collection is accessed from the `SURVEY`. `SURVEY` can be imported, and `crawler.scan()` returns it. 
+`SURVEY` and all underlaying objects are read-only. Attempts to modify any data will raise an exception.
 
 ```python
 from aerographer.crawler import Crawler
-from aerographer.scan import SURVEY
+from aerographer.survey import SURVEY
 
 crawler = Crawler(
     services=["ec2.security_group"],
@@ -329,12 +246,11 @@ crawler = Crawler(
 
 crawler.scan()
 
-for id, group in SURVEY['ec2']['security_group'].items():
-    print(id, group)
+for group in SURVEY.ec2.security_group.get_resources():
+    print(group.id)
 ```
 
-The scan data is held in the `data` attribute of the resource instance.<br />
-The resource data attribute is in the structure of the resource data returned by boto3. example: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_regions > `Returns`
+The resource attributes are in the structure of the data returned by boto3. example: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_regions >
 
 boto3 returns this:
 
@@ -350,32 +266,94 @@ boto3 returns this:
 }
 ```
 
-crawler data structure is this:
+Resource attributes are accessed as object attribues.
 
 ```json
-{
-  "Endpoint": "string",
-  "RegionName": "string",
-  "OptInStatus": "string"
-}
+region.Endpoint
+region.RegionName
+region.OptInStatus
 ```
 
-This is an example of using `SURVEY` and `resource.data` to check if a security group has a specific tag.
+Resource attribute access goes as many levels deep as the returned data structure does.
 
 ```python
-from aerographer.scan import SURVEY
+kms_key.MultiRegionConfiguration.PrimaryKey.Arn
+```
 
-def check_name_tag() -> Result:
+This is an example of using `SURVEY` and `resource` to check if a security group has a specific tag.
+
+```python
+from aerographer.survey import SURVEY
+
+def check_name_tag() -> list[str]:
     """return list of security groups with `Name` tag."""
     has_name_tag = []
 
-    for group in SURVEY['ec2']['security_group'].values():
-        if [tag for tag in group.data.Tags if tag.Key == 'Name']:
+    for group in SURVEY.ec2.security_group.get_resources():
+        if [tag for tag in group.Tags if tag.Key == 'Name']:
             has_name_tag.append(group.id)
 
     return has_name_tag
 ```
 
+The `SURVEY` class can either be traversed with dot notation, or with get functions.
+
+```python
+SURVEY.ec2 == SURVEY.get_service('ec2')
+SURVEY.iam.role == SURVEY.get_service('iam').get_resource_type('role')
+```
+A list of available `services`, `resource types`, and `resources` can be accessed through a class attribute
+
+```python
+SURVEY.services
+SURVEY.ec2.resource_types
+SURVEY.ec2.security_group.resources
+```
+
+Resource objects are accessed by either the `get_resources()` or `get_resource()` function at every level.
+
+```python
+SURVEY.get_resources()                      # <--- returns all resources in the survey
+SURVEY.kms.get_resources()               # <--- returns all resources in the kms service
+SURVEY.ec2.instance.get_resources()  # <--- returns all resources in the ec2.instance resource type
+SURVEY.get_resource('sg-01234567890')
+SURVEY.ec2.security_group.get_resource('sg-01234567890')
+```
+
+The `SURVEY` class has simple filtering capabilities provided with the `where()` function chained with the `get_resources()` function. The `where()` function can be chained as many times as desired. The `where_not()` is also available, and operates exactly the same as the `where()` function, but filters resources where the query does not match.
+
+The `where()` function takes three arguements. `attribute`, `condition`, and `values`.
+
+**attribute:** is a `string` dot notation path to the desired attribute location. List index indicators can be either a number for a specific index, or `*` for all indexes in the list.
+
+**condition:** is the comparision to perform between `attribute` and `values`. Comparision actions follow normal python type requirements. ie: `"a" > 1 == TypeError`
+
+The following conditions are supported:
+* 'eq': equal
+* 'ne': not equal
+* 'gt': greater than
+* 'lt': less than
+* 'contains': contains
+* 'not_contains': does not contain
+* 'startswith': starts with
+* 'endswith': ends with
+
+**values:** is a list of values to match values at the `attribute` location.
+
+```python
+SURVEY.ec2.instance.get_resources().where('id', 'eq', 'i-123abc456def')
+SURVEY.get_resources().where('Tags.*.Key', 'eq', 'stage').where_not('Tags.*.Value', 'eq', 'prod')
+```
+
+The `where()` function returns a generator like object, so in cases where a resolved iterator is required (such as an `if` statement), end the filter statement with the `get()` function to convert the return value to a list.
+
+```python
+if SURVEY.ec2.instances.get_resources().where('Platform', 'eq', 'Windows').get():   # <--- returns list
+	...
+	
+for key in SURVEY.kms.keys.get_resources().where_not('Enabled', 'eq', True):    # <--- returns generator
+	...
+```
 ---
 
 ## ENVIRONMENTAL VARIABLES
@@ -389,14 +367,6 @@ Environmental variables can be used to provide property values.
 **AG_AWS_ROLE:** Name of role to assume. Role name only, not full ARN.
 
 **AG_AWS_REGIONS:** Comma delimited list of regions to scan.
-
-**AG_SERVICE_DEFINITIONS:** Custom service definitions property file location.
-
----
-
-## CLI
-
-- to do
 
 ---
 

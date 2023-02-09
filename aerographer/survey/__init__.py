@@ -405,6 +405,8 @@ class SurveySearch(Generator):
         )
 
 
+# TODO: switch get_resources() and get_services() functions to return list[Str] instead of generators.
+# TODO: Convert SURVEY object 'set' attributes to 'tuples' on publish for read-only.
 class SurveyResourceType(Freezable):
     """Contains scan objects of specific resource type.
 
@@ -431,8 +433,8 @@ class SurveyResourceType(Freezable):
         Args:
             resource (GenericCrawler): Resource to add.
         """
-        self.resources.add(resource.id)
         self.__setattr__(_serialize_resource_id(resource.id), resource)
+        self.resources.add(resource.id)
 
     def get_resource(self, resource: str) -> GenericCrawler:
         """Get single resource.
@@ -512,8 +514,8 @@ class SurveyService(Freezable):
         Args:
             resource_type (str): Resource type to add.
         """
-        self.resource_types.add(resource_type)
         self.__setattr__(resource_type, SurveyResourceType(resource_type))
+        self.resource_types.add(resource_type)
 
     def get_resource_type(self, resource_type: str) -> SurveyResourceType:
         """Get single resource type.
@@ -657,8 +659,8 @@ class Survey(Freezable):
         Args:
             service (str): service to add.
         """
-        self.services.add(service)
         self.__setattr__(service, SurveyService(service))
+        self.services.add(service)
 
     def get_service(self, service: str) -> SurveyService:
         """Get single service.
