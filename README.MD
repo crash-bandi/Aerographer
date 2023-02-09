@@ -268,7 +268,7 @@ boto3 returns this:
 
 Resource attributes are accessed as object attribues.
 
-```json
+```python
 region.Endpoint
 region.RegionName
 region.OptInStatus
