@@ -143,6 +143,8 @@ def _resolve_pages(
         List of pages.
     """
 
+    # TODO: implement retry process for timeouts
+    # botocore.exceptions.ClientError: An error occurred (Throttling) when calling the GetPolicyVersion operation (reached max retries: 4): Rate exceeded
     logger.trace('Paging on %s.%s...', context, func)  # type: ignore
     pages = [page for page in page_iterator]
     logger.trace('Done paging %s.%s.', context, func)  # type: ignore

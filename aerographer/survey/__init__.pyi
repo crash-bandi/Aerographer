@@ -43,7 +43,7 @@ class SurveySearch(Generator):
 
 class SurveyResourceType(Freezable):
     resource_type: str
-    resources: set(str)
+    resources: set[str]
 
     def __init__(self, resource_type: str) -> None: ...
     def _add_resource(self, resource: GenericCrawler) -> None: ...
