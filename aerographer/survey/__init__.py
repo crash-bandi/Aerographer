@@ -304,6 +304,16 @@ class SurveySearch(Generator):
     def __iter__(self) -> Generator[GenericCrawler, None, None]:
         return super().__iter__()
 
+    def get(self) -> list[GenericCrawler]:
+        """Return resolved query.
+
+        Resolve query generator to list of results.
+
+        Returns:
+            List of `GenericCrawler` objects.
+        """
+        return list(self)
+
     def send(self, *args, **kwargs) -> Any:
         """Default generator method. Not of external use."""
         return next(self.__iter)  # type: ignore[call-overload]
