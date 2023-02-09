@@ -13,4 +13,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""policy document resource."""
+"""policy document resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "PolicyDocuments",
+    "idAttribute": "PolicyName",
+    "paginator": "get_policy_version",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "PolicyName": str,
+        "Document": str,
+        "VersionId": str,
+        "IsDefaultVersion": bool,
+        "CreateDate": str,
+    },
+}

@@ -26,10 +26,10 @@ from typing import Any, Callable, Coroutine, Iterable
 
 from aerographer.logger import logger
 from aerographer.exceptions import (
-    ActiveCrawlerScanExceptionError,
-    TimeOutCrawlerScanExceptionError,
-    PaginatorNotFoundExecptionError,
-    FailedCrawlerScanExceptionError,
+    ActiveCrawlerScanError,
+    TimeOutCrawlerScanError,
+    PaginatorNotFoundError,
+    FailedCrawlerScanError,
 )
 
 
@@ -63,19 +63,19 @@ async def async_scan(cls: Any) -> None:
         cls (GenericCrawler): web crawler class to run scan from.
 
     Raises:
-        FailedCrawlerScanExceptionError: Scan failed.
-        TimeOutCrawlerScanExceptionError: Scan timed out.
+        FailedCrawlerScanError: Scan failed.
+        TimeOutCrawlerScanError: Scan timed out.
     """
 
-    for _ in range(60):
+    for i in range(60):
         try:
             return await cls.scan()
-        except ActiveCrawlerScanExceptionError:
+        except ActiveCrawlerScanError:
             await asyncio.sleep(2)
-        except PaginatorNotFoundExecptionError as err:
-            raise FailedCrawlerScanExceptionError(err) from err
+        except PaginatorNotFoundError as err:
+            raise FailedCrawlerScanError(err) from err
 
-    raise TimeOutCrawlerScanExceptionError
+    raise TimeOutCrawlerScanError
 
 
 async def async_paginate(
@@ -95,6 +95,9 @@ async def async_paginate(
         id_key (str): (Optional) value to use for id key.
         id_values (list[str]): (Optional) list to use for id values.
         **kwargs: (Optional) additional arguments to pass to paginator.
+
+    Return:
+        Tuple containing lists of pages.
     """
 
     if (id_key and not id_values) or (id_values and not id_key):
@@ -108,13 +111,17 @@ async def async_paginate(
     else:
         paginators.append(asyncify(paginator.paginate, **kwargs))
 
+    logger.trace('Gathering paginators for %s.', paginator.function)  # type: ignore
     pages_iterables = await asyncio.gather(*paginators)
+
+    logger.trace('Resolving pages for %s.', paginator.function)  # type: ignore
     pages = await asyncio.gather(
         *[
             asyncify(_resolve_pages, pager, paginator.context, paginator.function)
             for pager in pages_iterables
         ]
     )
+    logger.trace('Pagination for %s complete.', paginator.function)  # type: ignore
 
     return pages
 
@@ -131,7 +138,13 @@ def _resolve_pages(
         page_iterator (Any): Page interactor to resolve.
         context (str): name of context.
         func (str): name of function.
+
+    Return:
+        List of pages.
     """
+
+    # TODO: implement retry process for timeouts
+    # botocore.exceptions.ClientError: An error occurred (Throttling) when calling the GetPolicyVersion operation (reached max retries: 4): Rate exceeded
     logger.trace('Paging on %s.%s...', context, func)  # type: ignore
     pages = [page for page in page_iterator]
     logger.trace('Done paging %s.%s.', context, func)  # type: ignore

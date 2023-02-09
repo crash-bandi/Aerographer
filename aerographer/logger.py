@@ -21,10 +21,23 @@ custom log formatter on initialization.
 
 import sys
 import logging
+from enum import IntEnum
 from typing import Any
 
 from aerographer.config import LOGGING_LEVEL
 from aerographer.exceptions import InvalidLoggingLevelError
+
+
+class LOG_LEVEL(IntEnum):
+    """Log level enum."""
+
+    NONE = logging.NOTSET
+    CRITICAL = logging.CRITICAL
+    ERROR = logging.ERROR
+    WARN = logging.WARN
+    INFO = logging.INFO
+    DEBUG = logging.DEBUG
+    TRACE = logging.DEBUG - 5
 
 
 def addLoggingLevel(levelName: str, levelNum: int) -> None:
@@ -80,18 +93,7 @@ def addLoggingLevel(levelName: str, levelNum: int) -> None:
     setattr(logging, methodName, logToRoot)
 
 
-TRACE = logging.DEBUG - 5
-addLoggingLevel('TRACE', TRACE)
-
-log_levels: dict[str, Any] = {
-    'none': logging.NOTSET,
-    'critical': logging.CRITICAL,
-    'error': logging.ERROR,
-    'warn': logging.WARN,
-    'info': logging.INFO,
-    'debug': logging.DEBUG,
-    'trace': TRACE,
-}
+addLoggingLevel('TRACE', LOG_LEVEL.TRACE)
 
 
 class LogFormatter(logging.Formatter):
@@ -110,10 +112,9 @@ class LogFormatter(logging.Formatter):
         format(record): format log record.
     """
 
-    debug_format: str = '[%(filename)s:%(lineno)s - %(funcName)s() ]%(asctime)s: %(levelname)s - %(message)s'
+    debug_format: str = '[%(filename)s:%(lineno)s - %(funcName)s() ]%(asctime)s: %(levelname)s: %(message)s'
     info_format: str = '%(message)s'
-    default_format: str = '%(levelname)s - %(message)s'
-    debug: bool = False
+    default_format: str = '%(levelname)s: %(message)s'
 
     def __init__(self) -> None:
         super().__init__(fmt="%(levelno)d: %(msg)s", datefmt=None, style='%')
@@ -136,7 +137,7 @@ class LogFormatter(logging.Formatter):
         format_orig = self._style._fmt
 
         # Replace the original format with one customized by logging level
-        if self.debug:
+        if LOG_LEVEL[LOGGING_LEVEL.upper()] in (LOG_LEVEL.DEBUG, LOG_LEVEL.TRACE):
             self._style._fmt = LogFormatter.debug_format
         else:
             if record.levelno == logging.INFO:
@@ -157,17 +158,22 @@ logger = logging.getLogger(__name__)
 handler = logging.StreamHandler(sys.stdout)
 
 try:
-    logger.setLevel(log_levels[LOGGING_LEVEL.lower()])
-    handler.setLevel(log_levels[LOGGING_LEVEL.lower()])
+    logger.setLevel(LOG_LEVEL[LOGGING_LEVEL.upper()])
+    handler.setLevel(LOG_LEVEL[LOGGING_LEVEL.upper()])
 except KeyError as err:
     raise InvalidLoggingLevelError(
-        f'{LOGGING_LEVEL.lower()} is an invalid logging level.'
+        f'"{LOGGING_LEVEL.lower()}" is an invalid logging level.'
     ) from err
 
 formatter = LogFormatter()
-if logger.level in (log_levels['debug'], log_levels['trace']):
-    formatter.debug = True
-
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-logger.trace('Logger created.')  # type: ignore
+
+# TODO: this doesn't work
+if logger.level == LOG_LEVEL.TRACE:
+    logging.getLogger('botocore').setLevel(logging.DEBUG)
+    logging.getLogger('urllib3').setLevel(logging.DEBUG)
+    logging.getLogger('boto3').setLevel(logging.DEBUG)
+
+# The only way this will displays is if level is TRACE on initialization. Use env var AG_LOGGING_LEVEL.
+logger.trace("logger created.")  # type: ignore

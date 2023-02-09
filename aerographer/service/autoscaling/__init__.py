@@ -17,3 +17,5 @@ limitations under the License.
 
 Contains any customer paginators for service.
 """
+
+SERVICE_DEFINITION = {'globalService': False}

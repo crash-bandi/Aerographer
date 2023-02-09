@@ -13,4 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""role policy id resource."""
+"""role policy id resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "PolicyNames",
+    "idAttribute": "PolicyName",
+    "paginator": "list_role_policies",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {"RoleName": str, "PolicyName": str},
+}

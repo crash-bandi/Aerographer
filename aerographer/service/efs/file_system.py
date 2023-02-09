@@ -13,4 +13,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""file_system resource."""
+"""file_system resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "FileSystems",
+    "idAttribute": "FileSystemId",
+    "paginator": "describe_file_systems",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "OwnerId": str,
+        "CreationToken": str,
+        "FileSystemId": str,
+        "FileSystemArn": str,
+        "CreationTime": str,
+        "LifeCycleState": str,
+        "Name": str,
+        "NumberOfMountTargets": int,
+        "SizeInBytes": {
+            "Value": int,
+            "Timestamp": str,
+            "ValueInIA": int,
+            "ValueInStandard": int,
+        },
+        "PerformanceMode": str,
+        "Encrypted": bool,
+        "KmsKeyId": str,
+        "ThroughputMode": str,
+        "ProvisionedThroughputInMibps": float,
+        "AvailabilityZoneName": str,
+        "AvailabilityZoneId": str,
+        "Tags": [{"Key": str, "Value": str}],
+    },
+}

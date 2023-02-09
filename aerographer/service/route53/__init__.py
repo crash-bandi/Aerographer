@@ -19,10 +19,13 @@ Contains any customer paginators for service.
 """
 
 from typing import Any
-from aerographer.scan import SURVEY
+from aerographer.scan import scan_results
 from aerographer.scan.parallel import async_paginate
 from aerographer.crawler import get_crawlers, deploy_crawlers
 from aerographer.crawler.generic import GenericCustomPaginator
+
+
+SERVICE_DEFINITION = {'globalService': True}
 
 
 class RecordSetPaginator(GenericCustomPaginator):
@@ -31,7 +34,7 @@ class RecordSetPaginator(GenericCustomPaginator):
     Custom paginator used to retrieve resource information from AWS.
 
     Attributes:
-        INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+        INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
         context (CONTEXT): Which context to use for retrieving data.
         paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -39,7 +42,7 @@ class RecordSetPaginator(GenericCustomPaginator):
         paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['route53.hosted_zone']
+    INCLUDE = {'route53.hosted_zone'}
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.
@@ -55,14 +58,18 @@ class RecordSetPaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        pages: list[dict[str, Any]] = []
+
+        if not scan_results['route53']['hosted_zone'].values():
+            return tuple(pages)
+
         zones: list[str] = [
             i.id
-            for i in SURVEY['route53']['hosted_zone'].values()
+            for i in scan_results['route53']['hosted_zone'].values()
             if i.context == self.context
         ]
 
         ## return a single page with multiple results
-        pages: list[dict[str, Any]] = []
         page: dict[str, list[dict[str, str]]] = {'ResourceRecordSets': []}
 
         page_results: dict[str, list[dict[str, Any]]] = dict(

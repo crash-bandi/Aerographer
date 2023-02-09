@@ -82,6 +82,7 @@ def get_session(region: str, profile: str | None = None) -> boto3.Session:
     """
 
     try:
+        logger.trace('Building boto3 session for %s - %s.', profile, region)  # type: ignore
         return boto3.Session(profile_name=profile, region_name=region)
     except ProfileNotFound as err:
         logger.error(err)
@@ -104,6 +105,12 @@ def assume_role(session: boto3.Session, role_arn: str) -> boto3.Session:
     client = get_client('sts', session)
 
     try:
+        logger.trace(  # type: ignore
+            'Retrieving STS credentials for %s with Session(profile_name=%s, region_name=%s).',
+            role_arn,
+            session.profile_name,
+            session.region_name,
+        )
         assumed_role_object = client.assume_role(
             RoleArn=role_arn, RoleSessionName="AerographerAssumedSession"
         )
@@ -113,6 +120,7 @@ def assume_role(session: boto3.Session, role_arn: str) -> boto3.Session:
 
     credentials = assumed_role_object['Credentials']
 
+    logger.trace('Building boto3 session with STS credentials.')  # type: ignore
     return boto3.Session(
         aws_access_key_id=credentials['AccessKeyId'],
         aws_secret_access_key=credentials['SecretAccessKey'],
@@ -135,6 +143,12 @@ def get_client(service: str, session: boto3.Session = boto3.Session) -> Any:
     """
 
     try:
+        logger.trace(  # type: ignore
+            'Building boto3 client for %s with Session(profile_name=%s, region_name=%s).',
+            service,
+            session.profile_name,
+            session.region_name,
+        )
         return session.client(service_name=service)
     except NoRegionError as err:
         logger.error(err)
@@ -161,6 +175,11 @@ def get_caller_id(session: boto3.Session) -> dict[str, str]:
     """
 
     try:
+        logger.trace(  # type: ignore
+            'Getting caller id with Session(profile_name=%s, region_name=%s).',
+            session.profile_name,
+            session.region_name,
+        )
         client = get_client('sts', session)
         identity = client.get_caller_identity()
     except (NoCredentialsError, ClientError, EndpointConnectionError) as err:

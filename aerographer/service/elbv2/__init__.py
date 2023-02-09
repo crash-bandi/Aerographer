@@ -19,10 +19,13 @@ Contains any customer paginators for service.
 """
 
 from typing import Any
-from aerographer.scan import SURVEY
+from aerographer.scan import scan_results
 from aerographer.scan.parallel import async_paginate
 from aerographer.crawler import get_crawlers, deploy_crawlers
 from aerographer.crawler.generic import GenericCustomPaginator
+
+
+SERVICE_DEFINITION = {'globalService': False}
 
 
 class TagPaginator(GenericCustomPaginator):
@@ -32,7 +35,7 @@ class TagPaginator(GenericCustomPaginator):
 
 
     Attributes:
-        INCLUDE (list[str]): (class attribute) List of resource information the paginator is dependant on.
+        INCLUDE (set[str]): (class attribute) List of resource information the paginator is dependant on.
         context (CONTEXT): Which context to use for retrieving data.
         paginate_func_name (str): Name of the boto3 function used to retrieve data.
 
@@ -40,7 +43,7 @@ class TagPaginator(GenericCustomPaginator):
         paginate(**kwargs): Retrieve data.
     """
 
-    INCLUDE = ['elbv2.load_balancer']
+    INCLUDE = {'elbv2.load_balancer'}
 
     async def paginate(self, **kwargs: Any) -> tuple[dict[str, Any], ...]:
         """Retrieves pages of resource data.
@@ -56,14 +59,18 @@ class TagPaginator(GenericCustomPaginator):
         """
 
         await deploy_crawlers(get_crawlers(services=self.INCLUDE))
+        pages: list[dict[str, Any]] = []
+
+        if not scan_results['elbv2']['load_balancer'].values():
+            return tuple(pages)
+
         load_balancers: list[str] = [
-            i.data.LoadBalancerArn  # type: ignore
-            for i in SURVEY['elbv2']['load_balancer'].values()
+            i.LoadBalancerArn  # type: ignore
+            for i in scan_results['elbv2']['load_balancer'].values()
             if i.context == self.context
         ]
 
         chunks = [load_balancers[x : x + 20] for x in range(0, len(load_balancers), 20)]
-        pages: list[dict[str, Any]] = []
 
         results = await async_paginate(
             paginator=self.paginator, id_key='ResourceArns', id_values=chunks, **kwargs

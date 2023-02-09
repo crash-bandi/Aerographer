@@ -13,4 +13,56 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""launch configuration resource."""
+"""launch configuration resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "LaunchConfigurations",
+    "idAttribute": "LaunchConfigurationName",
+    "paginator": "describe_launch_configurations",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "LaunchConfigurationName": str,
+        "LaunchConfigurationARN": str,
+        "ImageId": str,
+        "KeyName": str,
+        "SecurityGroups": [str],
+        "ClassicLinkVPCId": str,
+        "ClassicLinkVPCSecurityGroups": [str],
+        "UserData": str,
+        "InstanceType": str,
+        "KernelId": str,
+        "RamdiskId": str,
+        "BlockDeviceMappings": [
+            {
+                "VirtualName": str,
+                "DeviceName": str,
+                "Ebs": {
+                    "SnapshotId": str,
+                    "VolumeSize": int,
+                    "VolumeType": str,
+                    "DeleteOnTermination": bool,
+                    "Iops": int,
+                    "Encrypted": bool,
+                    "Throughput": int,
+                },
+                "NoDevice": bool,
+            }
+        ],
+        "InstanceMonitoring": {"Enabled": bool},
+        "SpotPrice": str,
+        "IamInstanceProfile": str,
+        "CreatedTime": str,
+        "EbsOptimized": bool,
+        "AssociatePublicIpAddress": bool,
+        "PlacementTenancy": str,
+        "MetadataOptions": {
+            "HttpTokens": str,
+            "HttpPutResponseHopLimit": int,
+            "HttpEndpoint": str,
+        },
+    },
+}

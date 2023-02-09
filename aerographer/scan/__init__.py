@@ -17,13 +17,14 @@ limitations under the License.
 
 Contains the functions required to establish, track, and
 distribute sessions with the target AWS accounts for
-scanning. Also contains the `SURVEY` data
+scanning. Also contains the `scan_results` data
 structure where all data retrived by the web crawlers
 is stored. Not meant for external use.
 """
 
 from typing import Any
 import asyncio
+
 from aerographer.scan.parallel import asyncify
 from aerographer.scan.context import (
     SESSION,
@@ -34,10 +35,10 @@ from aerographer.scan.context import (
     get_caller_id,
 )
 from aerographer.logger import logger
-from aerographer.config import ACCOUNTS, SERVICE_DEFINITIONS
+from aerographer.config import ACCOUNTS
 
 
-SURVEY: dict[str, Any] = {}
+scan_results: dict[str, Any] = {}
 CONTEXTS: tuple[CONTEXT, ...]
 
 
@@ -61,7 +62,7 @@ def _init_session(profile: str, region: str, role: str) -> SESSION:
 
     account_id = get_caller_id(session=session)['Account']
 
-    logger.trace('Initializing session %s.%s...', account_id, region)  # type: ignore
+    logger.trace('Initializing session %s.%s.', account_id, region)  # type: ignore
 
     return SESSION(region=session.region_name, session=session)
 
@@ -86,7 +87,7 @@ def _init_service_contexts(session: SESSION, services: set[str]) -> list[CONTEXT
     contexts: list[CONTEXT] = []
     for service in services:
         logger.trace(  # type: ignore
-            'Initializing context %s:%s:%s...',
+            'Initializing context %s:%s:%s.',
             caller_id["Account"],
             service,
             session.region,
@@ -165,7 +166,7 @@ async def _init_contexts(
     )
 
 
-def init(accounts: list[dict[str, Any]], services: set[str]) -> tuple[CONTEXT, ...]:
+def build_contexts(accounts: list[dict[str, Any]], services: set[str]) -> None:
     """Initializes scan contexts.
 
     Initializes contexts for current scan.
@@ -178,5 +179,7 @@ def init(accounts: list[dict[str, Any]], services: set[str]) -> tuple[CONTEXT, .
         Tuple containing created `CONTEXT` instances.
     """
     # TODO: exception handling doesn't work due to asyncio use. run without credentials to trigger exception.
+    global CONTEXTS
+    logger.trace('Building contexts.')  # type: ignore
     sessions = asyncio.run(_init_sessions(accounts))
-    return asyncio.run(_init_contexts(sessions, services))
+    CONTEXTS = asyncio.run(_init_contexts(sessions, services))

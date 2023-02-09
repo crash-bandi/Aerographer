@@ -13,4 +13,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""launch_template resource."""
+"""launch_template resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "LaunchTemplates",
+    "idAttribute": "LaunchTemplateId",
+    "paginator": "describe_launch_templates",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "LaunchTemplateId": str,
+        "LaunchTemplateName": str,
+        "CreateTime": str,
+        "CreatedBy": str,
+        "DefaultVersionNumber": int,
+        "LatestVersionNumber": int,
+        "Tags": [{"Key": str, "Value": str}],
+    },
+}

@@ -15,14 +15,14 @@ limitations under the License.
 
 """Type stub file"""
 
-from typing import Any
 import logging
+from enum import IntEnum
 
-log_levels: dict[str, Any]
 logger: logging.Logger
 handler: type
 formatter: type
 
+class LOG_LEVEL(IntEnum): ...
 class LogFormatter(logging.Formatter):
     debug_format: str
     info_format: str

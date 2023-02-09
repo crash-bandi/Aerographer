@@ -13,4 +13,48 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""subnet resource."""
+"""subnet resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "Subnets",
+    "idAttribute": "SubnetId",
+    "paginator": "describe_subnets",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "AvailabilityZone": str,
+        "AvailabilityZoneId": str,
+        "AvailableIpAddressCount": int,
+        "CidrBlock": str,
+        "DefaultForAz": bool,
+        "EnableLniAtDeviceIndex": int,
+        "MapPublicIpOnLaunch": bool,
+        "MapCustomerOwnedIpOnLaunch": bool,
+        "CustomerOwnedIpv4Pool": str,
+        "State": str,
+        "SubnetId": str,
+        "VpcId": str,
+        "OwnerId": str,
+        "AssignIpv6AddressOnCreation": bool,
+        "Ipv6CidrBlockAssociationSet": [
+            {
+                "AssociationId": str,
+                "Ipv6CidrBlock": str,
+                "Ipv6CidrBlockState": {"State": str, "StatusMessage": str},
+            }
+        ],
+        "Tags": [{"Key": str, "Value": str}],
+        "SubnetArn": str,
+        "OutpostArn": str,
+        "EnableDns64": bool,
+        "Ipv6Native": bool,
+        "PrivateDnsNameOptionsOnLaunch": {
+            "HostnameType": str,
+            "EnableResourceNameDnsARecord": bool,
+            "EnableResourceNameDnsAAAARecord": bool,
+        },
+    },
+}

@@ -17,13 +17,13 @@ limitations under the License.
 
 from typing import Any
 
-MODULE_PATH: str
 LOGGING_LEVEL: str
 PROFILES: list[str | None]
 ROLES: list[str | None]
 REGIONS: list[str | None]
+
+MODULE_NAME: str
+MODULE_PATH: str
 ACCOUNTS: list[dict[str, Any]]
-SERVICE_DEFINITIONS_CONFIG: str
-SERVICE_DEFINITIONS: dict[str, Any]
 
 def separate(text: str, regex: str = ...) -> list[str]: ...

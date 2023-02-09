@@ -13,4 +13,56 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-"""load_balancer resource."""
+"""load_balancer resource.
+
+    Dynamically generated Generic Crawler resource class is placed here.
+"""
+
+RESOURCE_DEFINITION = {
+    "resourceType": "LoadBalancerDescriptions",
+    "idAttribute": "LoadBalancerName",
+    "paginator": "describe_load_balancers",
+    "page_marker": None,
+    "scanParameters": {},
+    "responseSchema": {
+        "LoadBalancerName": str,
+        "DNSName": str,
+        "CanonicalHostedZoneName": str,
+        "CanonicalHostedZoneNameID": str,
+        "ListenerDescriptions": [
+            {
+                "Listener": {
+                    "Protocol": str,
+                    "LoadBalancerPort": int,
+                    "InstanceProtocol": str,
+                    "InstancePort": int,
+                    "SSLCertificateId": str,
+                },
+                "PolicyNames": [str],
+            }
+        ],
+        "Policies": {
+            "AppCookieStickinessPolicies": [{"PolicyName": str, "CookieName": str}],
+            "LBCookieStickinessPolicies": [
+                {"PolicyName": str, "CookieExpirationPeriod": int}
+            ],
+            "OtherPolicies": [str],
+        },
+        "BackendServerDescriptions": [{"InstancePort": int, "PolicyNames": [str]}],
+        "AvailabilityZones": [str],
+        "Subnets": [str],
+        "VPCId": str,
+        "Instances": [{"InstanceId": str}],
+        "HealthCheck": {
+            "Target": str,
+            "Interval": int,
+            "Timeout": int,
+            "UnhealthyThreshold": int,
+            "HealthyThreshold": int,
+        },
+        "SourceSecurityGroup": {"OwnerAlias": str, "GroupName": str},
+        "SecurityGroups": [str],
+        "CreatedTime": str,
+        "Scheme": str,
+    },
+}
