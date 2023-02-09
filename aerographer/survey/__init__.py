@@ -574,6 +574,14 @@ class SurveyService(Freezable):
     def __contains__(self, __o: Any) -> bool:
         return any(__o == resource for resource in self.get_resources())
 
+    def __getattr__(self, __attr: str) -> SurveyResourceType:
+        try:
+            return getattr(self, __attr)
+        except AttributeError:
+            raise AttributeError(
+                f"'{self.__class__.__name__}' object has no attribute '{__attr}'"
+            ) from None
+
 
 class Survey(Freezable):
     """Contains all scan objects.
@@ -747,6 +755,14 @@ class Survey(Freezable):
 
     def __contains__(self, __o: Any) -> bool:
         return any(__o == resource for resource in self.get_resources())
+
+    def __getattr__(self, __attr: str) -> SurveyService:
+        try:
+            return getattr(self, __attr)
+        except AttributeError:
+            raise AttributeError(
+                f"'{self.__class__.__name__}' object has no attribute '{__attr}'"
+            ) from None
 
 
 SURVEY = Survey()
