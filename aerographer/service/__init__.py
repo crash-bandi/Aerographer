@@ -31,7 +31,7 @@ from aerographer.crawler.factories import (
     initialize_crawler_metadata,
 )
 from aerographer.logger import logger
-from aerographer.exceptions import InvalidServiceDefinitionsExceptionError
+from aerographer.exceptions import InvalidServiceDefinitionError
 
 start = datetime.now()
 for _, module_name, is_pkg in pkgutil.walk_packages(__path__, __name__ + '.'):
@@ -40,7 +40,7 @@ for _, module_name, is_pkg in pkgutil.walk_packages(__path__, __name__ + '.'):
         try:
             service_definition = getattr(module, 'SERVICE_DEFINITION')
         except AttributeError:
-            raise InvalidServiceDefinitionsExceptionError(
+            raise InvalidServiceDefinitionError(
                 f'No service definition found for {module_name}'
             ) from None
     else:
@@ -49,14 +49,14 @@ for _, module_name, is_pkg in pkgutil.walk_packages(__path__, __name__ + '.'):
         try:
             resource_definition = getattr(sub_module, 'RESOURCE_DEFINITION')
         except AttributeError:
-            raise InvalidServiceDefinitionsExceptionError(
+            raise InvalidServiceDefinitionError(
                 f'No resource definition found for {module_name}'
             ) from None
 
         try:
             metadata_definition = resource_definition['responseSchema']
         except KeyError:
-            raise InvalidServiceDefinitionsExceptionError(
+            raise InvalidServiceDefinitionError(
                 f'No "responseSchema" definition found for {module_name}'
             ) from None
 

@@ -33,10 +33,10 @@ from aerographer.scan.parallel import asyncify, async_paginate
 from aerographer.evaluations import Result
 from aerographer.logger import logger
 from aerographer.exceptions import (
-    ActiveCrawlerScanExceptionError,
-    FailedCrawlerScanExceptionError,
-    PaginatorNotFoundExecptionError,
-    MetadataClassNotFoundExecptionError,
+    ActiveCrawlerScanError,
+    FailedCrawlerScanError,
+    PaginatorNotFoundError,
+    MetadataClassNotFoundError,
     EvaluationMethodNotFoundError,
     EvaluationMethodResultOutputError,
     FrozenInstanceError,
@@ -337,14 +337,14 @@ class GenericCrawler:
             Requested metadata class.
 
         Raises:
-            MetadataClassNotFoundExecptionError: Metadata class not found.
+            MetadataClassNotFoundError: Metadata class not found.
         """
 
         # metadata classes are created dynamically during initialization and
         # assigned as class attributes where they can be retrieved here.
         metadata_class = getattr(cls, f'{cls.__name__}{name}Metadata', None)
         if not metadata_class:
-            raise MetadataClassNotFoundExecptionError(
+            raise MetadataClassNotFoundError(
                 f'Failed to find "{cls.__name__}{name}Metadata".'
             )
 
@@ -365,7 +365,7 @@ class GenericCrawler:
             Requested metadata class.
 
         Raises:
-            PaginatorNotFoundExecptionError: Paginator not found.
+            PaginatorNotFoundError: Paginator not found.
         """
 
         try:
@@ -386,7 +386,7 @@ class GenericCrawler:
                 page_marker=cls.page_marker,
             )
         except Exception:
-            raise PaginatorNotFoundExecptionError(
+            raise PaginatorNotFoundError(
                 f'Failed to get paginator for {cls.__name__}'
             ) from None
 
@@ -402,7 +402,7 @@ class GenericCrawler:
             context (CONTEXT): context to use to run scan.
 
         Raises:
-            FailedCrawlerScanExceptionError: Scan failed.
+            FailedCrawlerScanError: Scan failed.
         """
 
         logger.debug('Scanning %s:%s...', context.name, cls.resourceName)
@@ -434,13 +434,13 @@ class GenericCrawler:
                 )
 
         except ParamValidationError as err:
-            raise FailedCrawlerScanExceptionError(
+            raise FailedCrawlerScanError(
                 (
                     f'Failed scan of {context.name}:{cls.resourceName} - invalid scan parameters.'
                 )
             ) from err
-        except (ClientError, MetadataClassNotFoundExecptionError) as err:
-            raise FailedCrawlerScanExceptionError(err) from err
+        except (ClientError, MetadataClassNotFoundError) as err:
+            raise FailedCrawlerScanError(err) from err
 
     @classmethod
     async def scan(cls) -> None:
@@ -450,13 +450,13 @@ class GenericCrawler:
         complete.
 
         Raises:
-            FailedCrawlerScanExceptionError: Scan failed.
+            FailedCrawlerScanError: Scan failed.
         """
 
         # make sure scan in not active or complete
         if cls.state == 'active':
             logger.debug('%s scan already in progress.', cls.__name__)
-            raise ActiveCrawlerScanExceptionError
+            raise ActiveCrawlerScanError
         elif cls.state == 'complete':
             logger.debug('%s scan already complete.', cls.__name__)
             return
@@ -527,12 +527,12 @@ class GenericCrawler:
             return __o.id == self.id
         return str(__o) == self.id
 
-    def __delattr__(self, __key: str):
+    def __delattr__(self, __key: str) -> None:
         if self._frozen:
             raise FrozenInstanceError(f"cannot delete field '{__key}'")
         object.__delattr__(self, __key)
 
-    def __setattr__(self, __key: str, __val: Any):
+    def __setattr__(self, __key: str, __val: Any) -> None:
         if self._frozen:
             raise FrozenInstanceError(f"cannot assign to field '{__key}'")
         object.__setattr__(self, __key, __val)
@@ -545,8 +545,8 @@ class GenericCrawler:
                 f"'{self.__class__.__name__}' object has no attribute '{__attr}'"
             ) from None
 
-    def __repr__(self):
-        return f'{self.__class__.__name__}({self.context.account_id}:{self.context.region}:{self.id})'
+    def __repr__(self) -> str:
+        return f'{self.__class__}({self.context.account_id}:{self.context.region}:{self.id})'
 
-    def __str__(self):
-        return self.id
+    def __str__(self) -> str:
+        return f'{self.__class__.__name__}({self.id})'

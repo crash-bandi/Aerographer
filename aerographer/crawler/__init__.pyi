@@ -17,6 +17,7 @@ limitations under the License.
 
 from typing import Any
 
+from aerographer.survey import Survey
 from aerographer.crawler.generic import GenericCrawler
 
 SURVEY: type
@@ -40,7 +41,7 @@ class Crawler:
         evaluations: list[str] | None = ...,
     ) -> None: ...
     def _apply_external_evaluations(self) -> None: ...
-    def scan(self) -> type: ...
+    def scan(self) -> Survey: ...
 
 def get_crawlers(
     services: set[str], skip: list[str] | None = ...

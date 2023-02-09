@@ -26,10 +26,10 @@ from typing import Any, Callable, Coroutine, Iterable
 
 from aerographer.logger import logger
 from aerographer.exceptions import (
-    ActiveCrawlerScanExceptionError,
-    TimeOutCrawlerScanExceptionError,
-    PaginatorNotFoundExecptionError,
-    FailedCrawlerScanExceptionError,
+    ActiveCrawlerScanError,
+    TimeOutCrawlerScanError,
+    PaginatorNotFoundError,
+    FailedCrawlerScanError,
 )
 
 
@@ -63,19 +63,19 @@ async def async_scan(cls: Any) -> None:
         cls (GenericCrawler): web crawler class to run scan from.
 
     Raises:
-        FailedCrawlerScanExceptionError: Scan failed.
-        TimeOutCrawlerScanExceptionError: Scan timed out.
+        FailedCrawlerScanError: Scan failed.
+        TimeOutCrawlerScanError: Scan timed out.
     """
 
     for i in range(60):
         try:
             return await cls.scan()
-        except ActiveCrawlerScanExceptionError:
+        except ActiveCrawlerScanError:
             await asyncio.sleep(2)
-        except PaginatorNotFoundExecptionError as err:
-            raise FailedCrawlerScanExceptionError(err) from err
+        except PaginatorNotFoundError as err:
+            raise FailedCrawlerScanError(err) from err
 
-    raise TimeOutCrawlerScanExceptionError
+    raise TimeOutCrawlerScanError
 
 
 async def async_paginate(

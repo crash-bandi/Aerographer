@@ -34,10 +34,10 @@ from aerographer.crawler.generic import GenericCrawler, GenericMetadata
 from aerographer.logger import logger
 from aerographer.config import MODULE_NAME
 from aerographer.exceptions import (
-    InvalidServiceDefinitionsExceptionError,
-    CrawlerNotFoundExecptionError,
-    EvaluationModuleNotFoundExecptionError,
-    EvaluationModuleFailedToLoadExecptionError,
+    InvalidServiceDefinitionError,
+    CrawlerNotFoundError,
+    EvaluationModuleNotFoundError,
+    EvaluationModuleFailedToLoadError,
     EvaluationMethodNameError,
 )
 
@@ -60,7 +60,7 @@ def import_crawlers(
         List of web crawlers.
 
     Raises:
-        CrawlerNotFoundExecptionError: failed to get GenericCrawler class.
+        CrawlerNotFoundError: failed to get GenericCrawler class.
     """
 
     skip = skip or []
@@ -82,11 +82,9 @@ def import_crawlers(
             module = importlib.import_module(path)
             logger.debug('loading module %s...', path)
         except ModuleNotFoundError as err:
-            raise CrawlerNotFoundExecptionError(
-                f'Failed to load {path} -- {err}'
-            ) from err
+            raise CrawlerNotFoundError(f'Failed to load {path} -- {err}') from err
         except ImportError as err:
-            raise CrawlerNotFoundExecptionError(f'Could not load {path}.') from err
+            raise CrawlerNotFoundError(f'Could not load {path}.') from err
 
         # search for any submodules
         if getattr(module, '__path__', None):
@@ -107,8 +105,8 @@ def import_crawlers(
                 crawler = _get_crawler_class(module)
                 _CRAWLER_CACHE[path] = crawler
                 crawlers.append(crawler)
-            except CrawlerNotFoundExecptionError as err:
-                raise CrawlerNotFoundExecptionError(f'Failed to load {path}.') from err
+            except CrawlerNotFoundError as err:
+                raise CrawlerNotFoundError(f'Failed to load {path}.') from err
 
     return crawlers
 
@@ -129,7 +127,7 @@ def initialize_crawler(
         New web crawler class
 
     Raises:
-        InvalidServiceDefinitionsExceptionError: invalid service definition found.
+        InvalidServiceDefinitionError: invalid service definition found.
     """
 
     required_definition_attributes = [
@@ -147,7 +145,7 @@ def initialize_crawler(
     # make sure required properties are present
     for attribute in required_definition_attributes:
         if attribute not in class_definition:
-            raise InvalidServiceDefinitionsExceptionError(
+            raise InvalidServiceDefinitionError(
                 f'Bad service definition found for {service}.{resource}. Missing "{attribute}" attribute.'
             )
 
@@ -183,14 +181,14 @@ def initialize_crawler_metadata(
         Tuple of new metadata classes
 
     Raises:
-        InvalidServiceDefinitionsExceptionError: invalid service definition found.
+        InvalidServiceDefinitionError: invalid service definition found.
     """
 
     logger.trace('Collecting %s.%s metadata class attributes', service, resource)  # type: ignore
 
     # length of 0 means schema definition is empty
     if len(class_definition) == 0:
-        raise InvalidServiceDefinitionsExceptionError(
+        raise InvalidServiceDefinitionError(
             f'Bad metadata definition found for {service}.{resource}'
         )
 
@@ -218,8 +216,8 @@ def apply_external_evaluations(evaluations: list[str]) -> None:
                 external_evalutations, _import_external_evaluations(path)
             )
         except (
-            EvaluationModuleNotFoundExecptionError,
-            EvaluationModuleFailedToLoadExecptionError,
+            EvaluationModuleNotFoundError,
+            EvaluationModuleFailedToLoadError,
         ) as err:
             logger.warning(err)
 
@@ -424,7 +422,7 @@ def _import_external_evaluations(path: str) -> dict[str, Any]:
         Dictionary containing evaluation data and methods.
 
     Raises:
-        EvaluationModuleNotFoundExecptionError: Failed to retrieve evaluation data.
+        EvaluationModuleNotFoundError: Failed to retrieve evaluation data.
     """
 
     evaluations: dict[str, Any] = {}
@@ -440,13 +438,11 @@ def _import_external_evaluations(path: str) -> dict[str, Any]:
             sys.path.append(path)
             module = importlib.import_module(path)
     except ModuleNotFoundError as err:
-        raise EvaluationModuleFailedToLoadExecptionError(
+        raise EvaluationModuleFailedToLoadError(
             f'Failed to load {path} -- {err}'
         ) from err
     except ImportError as err:
-        raise EvaluationModuleNotFoundExecptionError(
-            f'Could not load module {path}'
-        ) from err
+        raise EvaluationModuleNotFoundError(f'Could not load module {path}') from err
 
     # search module for submodules
     if getattr(module, '__path__', None):
@@ -515,7 +511,7 @@ def _get_crawler_class(module: ModuleType) -> GenericCrawler:
         GenericCrawler class or None.
 
     Raises:
-        CrawlerNotFoundExecptionError: if class is not found.
+        CrawlerNotFoundError: if class is not found.
     """
     try:
         return next(
@@ -526,7 +522,7 @@ def _get_crawler_class(module: ModuleType) -> GenericCrawler:
             )
         )
     except StopIteration:
-        raise CrawlerNotFoundExecptionError(
+        raise CrawlerNotFoundError(
             f'Did not find a crawler class in {module}'
         ) from None
 

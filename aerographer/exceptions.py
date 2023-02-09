@@ -23,27 +23,27 @@ class InvalidLoggingLevelError(Exception):
     """Invalid logging level encountered."""
 
 
-class InvalidServiceDefinitionsExceptionError(Exception):
+class InvalidServiceDefinitionError(Exception):
     """Invalid service definition encountered."""
 
 
-class CrawlerNotFoundExecptionError(Exception):
+class CrawlerNotFoundError(Exception):
     """Unable to find web crawler."""
 
 
-class MetadataClassNotFoundExecptionError(Exception):
+class MetadataClassNotFoundError(Exception):
     """Unable to find web crawler metadata class."""
 
 
-class PaginatorNotFoundExecptionError(Exception):
+class PaginatorNotFoundError(Exception):
     """Unable for find paginator."""
 
 
-class EvaluationModuleNotFoundExecptionError(Exception):
+class EvaluationModuleNotFoundError(Exception):
     """Invalid evaluations module encountered."""
 
 
-class EvaluationModuleFailedToLoadExecptionError(Exception):
+class EvaluationModuleFailedToLoadError(Exception):
     """Unable to load evaluations module."""
 
 
@@ -59,16 +59,24 @@ class EvaluationMethodResultOutputError(Exception):
     """Invalid evaluation function output type."""
 
 
-class ActiveCrawlerScanExceptionError(Exception):
+class ActiveCrawlerScanError(Exception):
     """Ongoing crawler scan encountered."""
 
 
-class FailedCrawlerScanExceptionError(Exception):
+class FailedCrawlerScanError(Exception):
     """Failed crawler scan encountered."""
 
 
-class TimeOutCrawlerScanExceptionError(Exception):
+class TimeOutCrawlerScanError(Exception):
     """Crawler scan timeout encountered."""
+
+
+class SurveyAttributeError(Exception):
+    """Survery AttributeError encountered."""
+
+
+class SurveySearchQueryError(Exception):
+    """Error with survery query search encountered."""
 
 
 class FrozenInstanceError(Exception):

@@ -40,18 +40,16 @@ from typing import Any
 from botocore.exceptions import ClientError  # type: ignore
 
 from aerographer.scan import build_contexts, scan_results
-from aerographer.scan.survey import make_survey, FrozenDict
+from aerographer.survey import SURVEY, Survey
 from aerographer.scan.parallel import async_scan
 from aerographer.crawler.factories import apply_external_evaluations, import_crawlers
 from aerographer.crawler.generic import GenericCrawler
 from aerographer.logger import logger
 from aerographer.config import PROFILES, ROLES, REGIONS, MODULE_NAME
 from aerographer.exceptions import (
-    CrawlerNotFoundExecptionError,
-    FailedCrawlerScanExceptionError,
+    CrawlerNotFoundError,
+    FailedCrawlerScanError,
 )
-
-SURVEY: type = ''
 
 
 def get_crawlers(
@@ -97,7 +95,7 @@ def get_crawlers(
         return sum(
             [import_crawlers(service, skip, quiet_skip) for service in services], []
         )
-    except CrawlerNotFoundExecptionError as err:
+    except CrawlerNotFoundError as err:
         logger.error(err)
         sys.exit(1)
 
@@ -143,7 +141,7 @@ async def deploy_crawlers(
         crawlers (list): List of web crawlers to deploy.
 
     Raises:
-        FailedCrawlerScanExceptionError: web crawler scan failed
+        FailedCrawlerScanError: web crawler scan failed
     """
     logger.debug('Gathering included crawlers...')
     for name, includes in [
@@ -156,7 +154,7 @@ async def deploy_crawlers(
     try:
         await asyncio.gather(*(async_scan(s) for s in crawlers + include_crawlers))
     except ClientError as err:
-        raise FailedCrawlerScanExceptionError(err) from err
+        raise FailedCrawlerScanError(err) from err
 
 
 class Crawler:
@@ -216,7 +214,7 @@ class Crawler:
             if self.crawlers is None:
                 logger.error('No crawlers found for %s', self.services)
                 sys.exit(1)
-        except CrawlerNotFoundExecptionError as err:
+        except CrawlerNotFoundError as err:
             logger.error('Error getting crawlers for %s -- %s', self.services, err)
             sys.exit(1)
 
@@ -227,7 +225,7 @@ class Crawler:
             for role in self.roles
         ]
 
-    def scan(self) -> type:
+    def scan(self) -> Survey:
         """Performs scan and evaluations of all web crawlers.
 
         Triggers each web crawler to scan target resource and perform any
@@ -254,7 +252,7 @@ class Crawler:
             asyncio.run(deploy_crawlers(crawlers=self.crawlers))
             logger.trace('Scan time: %s', datetime.now() - start)  # type:ignore
             gc.collect()
-        except FailedCrawlerScanExceptionError as err:
+        except FailedCrawlerScanError as err:
             logger.error('Scan failed -- %s', err)
             sys.exit(1)
 
@@ -276,7 +274,14 @@ class Crawler:
             ].values():
                 resource.run_evaluations()
 
-        global SURVEY
-        SURVEY = make_survey(RETURN_COLLECTION)
+        for service, resources in RETURN_COLLECTION.items():
+            SURVEY._add_service(service=service)
+            for resource, assets in resources.items():
+                s = SURVEY.get_service(service)
+                s._add_resource_type(resource_type=resource)
+                r = s.get_resource_type(resource_type=resource)
+                for asset in assets.values():
+                    r._add_resource(asset)
 
+        SURVEY._publish()
         return SURVEY
