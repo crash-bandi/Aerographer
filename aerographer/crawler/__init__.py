@@ -170,6 +170,7 @@ class Crawler:
         regions (list[str]): (optional) AWS region(s) to scan. Default ['us-east-1'].
         role (str): (optional) AWS role name to assume in each account.
         evaluations (list[str]): (optional) Module containing evalution functions to run.
+        parameters (list[dict]): (optional) List of paramter options to use for scan.
         crawlers (GenericCrawler): (class attribute) Collection of web crawlers to use.
 
     Methods:
@@ -184,6 +185,7 @@ class Crawler:
         roles: list[str] | None = None,  # safe default for list
         regions: list[str] | None = None,  # safe default for list
         evaluations: list[str] | None = None,  # safe default for list
+        parameters: list[dict[str, dict]] | None = None,
     ) -> None:
         """Class initializer."""
 
@@ -200,6 +202,7 @@ class Crawler:
         self.profiles = profiles or PROFILES
         self.roles = roles or ROLES
         self.regions = regions or REGIONS
+        self.parameters = parameters or []
 
         # apply provided external evaluations to web crawlers
         apply_external_evaluations(evaluations or [])
@@ -217,6 +220,24 @@ class Crawler:
         except CrawlerNotFoundError as err:
             logger.error('Error getting crawlers for %s -- %s', self.services, err)
             sys.exit(1)
+
+        # TODO: add to README
+        # set provided scan parameters
+        for k, v in (
+            (k, v) for parameter in self.parameters for k, v in parameter.items()
+        ):
+            service, resource = k.split('.')
+            crawler = next(
+                (
+                    crawler
+                    for crawler in self.crawlers
+                    if crawler.serviceType.lower() == service
+                    and crawler.resourceName == resource
+                ),
+                None,
+            )
+            if crawler:
+                crawler.scanParameters = v
 
         # initialize contexts
         self.accounts = [
