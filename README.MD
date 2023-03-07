@@ -333,8 +333,10 @@ The following conditions are supported:
 * 'ne': not equal
 * 'gt': greater than
 * 'lt': less than
-* 'contains': contains
-* 'not_contains': does not contain
+* 'contains': contains any
+* 'contains_all': contains all
+* 'not_contains': does not contain any
+* 'not_contains_all': does not contain all
 * 'startswith': starts with
 * 'endswith': ends with
 
