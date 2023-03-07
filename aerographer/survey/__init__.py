@@ -209,6 +209,36 @@ def _not_contains(val: Any, matches: list[Any]) -> bool:
     return any(match not in val for match in matches)
 
 
+def _contains_all(val: Any, matches: list[Any]) -> bool:
+    """Check if value contains all in provided list.
+
+    Returns `True` if value contains any items in provided list.
+
+    Args:
+        val (Any): Value to check.
+        matches (list[Any]): Values to check against.
+
+    Return:
+        Bool of comparision results.
+    """
+    return all(match in val for match in matches)
+
+
+def _not_contains_all(val: Any, matches: list[Any]) -> bool:
+    """Check if value not contains to all in provided list.
+
+    Returns `True` if value does not contain any items in provided list.
+
+    Args:
+        val (Any): Value to check.
+        matches (list[Any]): Values to check against.
+
+    Return:
+        Bool of comparision results.
+    """
+    return all(match not in val for match in matches)
+
+
 def _startswith(val: Any, matches: list[Any]) -> bool:
     """Check if value starts with to any in provided list.
 
@@ -294,6 +324,8 @@ class SurveySearch(Generator):
         'lt': _lt,
         'contains': _contains,
         'not_contains': _not_contains,
+        'contains_all': _contains_all,
+        'not_contains_all': _not_contains_all,
         'startswith': _startswith,
         'endswith': _endswith,
     }
