@@ -20,9 +20,12 @@ web calls during AWS crawling. Not meant for external
 use.
 """
 
+import time
 import inspect
 import asyncio
 from typing import Any, Callable, Coroutine, Iterable
+
+from botocore.exceptions import ClientError  # type: ignore
 
 from aerographer.logger import logger
 from aerographer.exceptions import (
@@ -67,7 +70,7 @@ async def async_scan(cls: Any) -> None:
         TimeOutCrawlerScanError: Scan timed out.
     """
 
-    for i in range(60):
+    for _ in range(60):
         try:
             return await cls.scan()
         except ActiveCrawlerScanError:
@@ -98,36 +101,92 @@ async def async_paginate(
 
     Return:
         Tuple containing lists of pages.
+
+    Raises:
+        FailedCrawlerScanError: Scan failed.
+        Boto3.ClientError: Scan failed.
     """
 
     if (id_key and not id_values) or (id_values and not id_key):
         raise ValueError('id_key and id_values are both required.')
 
-    paginators: list[Coroutine[Any, Any, Any]] = []
-    if id_key:
-        paginators.extend(
-            [asyncify(paginator.paginate, **{id_key: v}, **kwargs) for v in id_values]
-        )
-    else:
-        paginators.append(asyncify(paginator.paginate, **kwargs))
+    logger.debug('Paginating for %s.%s.', paginator.context, paginator.function)
 
-    logger.trace('Gathering paginators for %s.', paginator.function)  # type: ignore
-    pages_iterables = await asyncio.gather(*paginators)
+    for attempt in range(4):
+        if attempt:
+            logger.trace(  # type: ignore
+                'Pager %s.%s. attempt: %s',
+                paginator.context,
+                paginator.function,
+                attempt + 1,
+            )
 
-    logger.trace('Resolving pages for %s.', paginator.function)  # type: ignore
-    pages = await asyncio.gather(
-        *[
-            asyncify(_resolve_pages, pager, paginator.context, paginator.function)
-            for pager in pages_iterables
-        ]
+        stagger_delay: int = attempt * 2  # number of retries * 2 seconds
+        pager_delay: float = (
+            (attempt + 1) * 50
+        ) / 1000  # number of attempts * 50 milliseconds
+
+        paginators: dict[str, Coroutine[Any, Any, Any]] = {}
+        if id_key:
+            paginators.update(
+                {
+                    v: asyncify(paginator.paginate, **{id_key: v}, **kwargs)
+                    for v in id_values
+                }
+            )
+        else:
+            paginators = {'resource': asyncify(paginator.paginate, **kwargs)}
+
+        logger.trace('Gathering paginators for %s.%s.', paginator.context, paginator.function)  # type: ignore
+        pages_iterables = []
+        for index, item in enumerate(
+            dict(
+                zip(paginators.keys(), await asyncio.gather(*paginators.values()))
+            ).items()
+        ):
+            key, pager = item
+            pages_iterables.append(
+                asyncify(
+                    _resolve_pages,
+                    pager,
+                    paginator.context,
+                    paginator.function,
+                    key,
+                    stagger_delay * index,
+                    pager_delay,
+                )
+            )
+
+        try:
+            logger.trace('Resolving pages for %s.%s.', paginator.context, paginator.function)  # type: ignore
+            pages = await asyncio.gather(*pages_iterables)
+        except ClientError as err:
+            if err.response['Error']['Code'] == 'Throttling':
+                logger.trace('Coroutine queue size: %s', len(asyncio.all_tasks()))  # type: ignore
+                logger.warning(
+                    'Pagination for %s.%s call limit exceeded; backing off and retrying...',
+                    paginator.context,
+                    paginator.function,
+                )
+                time.sleep((attempt + 1) * 30)
+                continue
+            raise
+
+        logger.trace('Pagination for %s.%s complete.', paginator.context, paginator.function)  # type: ignore
+        return pages
+
+    raise FailedCrawlerScanError(
+        f'{paginator.context}.{paginator.function}: Max retries exceeded.'
     )
-    logger.trace('Pagination for %s complete.', paginator.function)  # type: ignore
-
-    return pages
 
 
 def _resolve_pages(
-    page_iterator: Iterable[Any], context: str, func: str
+    page_iterator: Iterable[Any],
+    context: str,
+    func: str,
+    key: str,
+    task_delay: int,
+    page_delay: float,
 ) -> list[dict[str, Any]]:
     """Resolves pagniator pages.
 
@@ -138,15 +197,32 @@ def _resolve_pages(
         page_iterator (Any): Page interactor to resolve.
         context (str): name of context.
         func (str): name of function.
+        key(str): resource id.
+        task_delay (int): number of seconds to delay job execution.
+        page_delay(float): number of seconds to pause between each page.
 
     Return:
         List of pages.
+
+    Raises:
+        Boto3.CleintError: Pagination failed.
     """
 
-    # TODO: implement retry process for timeouts
-    # botocore.exceptions.ClientError: An error occurred (Throttling) when calling the GetPolicyVersion operation (reached max retries: 4): Rate exceeded
-    logger.trace('Paging on %s.%s...', context, func)  # type: ignore
-    pages = [page for page in page_iterator]
-    logger.trace('Done paging %s.%s.', context, func)  # type: ignore
+    time.sleep(task_delay)
+
+    logger.trace('Paging on %s.%s.%s...', context, func, key)  # type: ignore
+
+    try:
+        pages = []
+        for page in page_iterator:
+            time.sleep(page_delay)
+            pages.append(page)
+    except ClientError as err:
+        logger.trace(  # type: ignore
+            'Pager %s.%s.%s experienced ClientError: %s', context, func, key, err
+        )
+        raise
+
+    logger.trace('Done paging %s.%s.%s.', context, func, key)  # type: ignore
 
     return pages

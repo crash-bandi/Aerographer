@@ -25,4 +25,11 @@ async def async_paginate(
     id_values: Iterable[Any] | None = ...,
     **kwargs: Any
 ) -> tuple[list[dict[str, Any]], ...]: ...
-def _resolve_pages(page_iterator: Iterable[Any]) -> list[dict[str, Any]]: ...
+def _resolve_pages(
+    page_iterator: Iterable[Any],
+    context: str,
+    func: str,
+    key: str,
+    task_delay: int,
+    page_delay: float
+) -> list[dict[str, Any]]: ...
