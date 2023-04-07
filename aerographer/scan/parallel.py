@@ -121,10 +121,10 @@ async def async_paginate(
                 attempt + 1,
             )
 
-        stagger_delay: int = attempt * 2  # number of retries * 2 seconds
-        pager_delay: float = (
-            (attempt + 1) * 50
-        ) / 1000  # number of attempts * 50 milliseconds
+        # number of retries * 2 seconds
+        stagger_delay: int = attempt * 2
+        # number of attempts * 50 milliseconds
+        pager_delay: float = ((attempt + 1) * 50) / 1000
 
         paginators: dict[str, Coroutine[Any, Any, Any]] = {}
         if id_key:
