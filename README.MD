@@ -11,6 +11,9 @@
         <img src="http://img.shields.io/pypi/l/boto3.svg?style=flat" /></a>
 </p>
 
+> **Warning**
+> Aerographer is in active development and is subject to change. Breaking changes may be introduced.
+
 Aerographer is a python utility for collecting and analysing information about cloud resources. It can be used as an imported python module, or evoked directly from a command line interface. While there are many options for collecting information from cloud platform, areographer provides a unique way to build custom analysis actions to run the collected information through. A simple decorator can be used on any external function that the module will automatically find and apply to the specified cloud resource data. This creates an simple way to collect and process data without the need to build the complex mechanisms required for the actual data retrieval process. The module takes care of the dynamic creation and execution of cloud crawlers, all you need to do is write the functions to act on the data.
 <br /><br />
 

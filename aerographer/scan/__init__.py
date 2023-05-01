@@ -55,6 +55,9 @@ def _init_session(profile: str, region: str, role: str) -> SESSION:
     Return:
         `SESSION` instances.
     """
+
+    # TODO: handle invalid region: urllib3.exceptions.NewConnectionError: <botocore.awsrequest.AWSHTTPSConnection object at 0x10aa17e10>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known
+
     session = get_session(profile=profile, region=region)
 
     if role:
@@ -103,6 +106,9 @@ def _init_service_contexts(session: SESSION, services: set[str]) -> list[CONTEXT
             )
         )
 
+    print()
+    print(contexts)
+    print()
     return contexts
 
 
