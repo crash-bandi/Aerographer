@@ -106,9 +106,6 @@ def _init_service_contexts(session: SESSION, services: set[str]) -> list[CONTEXT
             )
         )
 
-    print()
-    print(contexts)
-    print()
     return contexts
 
 
