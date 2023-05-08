@@ -177,5 +177,6 @@ RESOURCE_DEFINITION = {
         },
         "Ipv6Address": str,
         "MaintenanceOptions": {"AutoRecovery": str},
+        "CurrentInstanceBootMode": str,
     },
 }
