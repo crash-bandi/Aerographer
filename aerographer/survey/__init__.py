@@ -439,6 +439,7 @@ class SurveySearch(Generator):
 
 # TODO: switch get_resources() and get_services() functions to return list[Str] instead of generators.
 # TODO: Convert SURVEY object 'set' attributes to 'tuples' on publish for read-only.
+# TODO: Prevent survey components from being used before being published.
 class SurveyResourceType(Freezable):
     """Contains scan objects of specific resource type.
 
