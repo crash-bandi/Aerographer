@@ -38,6 +38,7 @@ from aerographer.exceptions import (
     PaginatorNotFoundError,
     MetadataClassNotFoundError,
     EvaluationMethodNotFoundError,
+    EvaluationMethodInputError,
     EvaluationMethodResultOutputError,
     FrozenInstanceError,
 )
@@ -234,7 +235,7 @@ class GenericCrawler:
         """Returns if all evaluations passed."""
         return all(result[1].status for result in self.results)
 
-    def evaluate(self, evaluation: str) -> bool:
+    def evaluate(self, evaluation: str, survey) -> bool:
         """Run class evaluation methods.
 
         Runs all methods listed in `evaluations` class attribute and
@@ -261,7 +262,19 @@ class GenericCrawler:
             ) from err
 
         # run evlaution and record result
-        eval_result = eval_func()
+        if len(eval_func.__includes__) > 0:  # type: ignore[attr-defined]
+            try:
+                eval_result = eval_func(survey=survey)
+            except TypeError as err:
+                if "got an unexpected keyword argument 'survey'" in str(err):
+                    raise EvaluationMethodInputError(
+                        f"Evaluation function '{eval_func.__name__}' with includes missing required 'survey' parameter."
+                    ) from None
+                raise err
+
+        else:
+            eval_result = eval_func()
+
         if not isinstance(eval_result, Result):
             raise EvaluationMethodResultOutputError(
                 f'"{evaluation}" returned {type(eval_result)}. Must return {Result}.'
@@ -272,7 +285,7 @@ class GenericCrawler:
         # return evalutions status
         return eval_result.status
 
-    def run_evaluations(self) -> None:
+    def run_evaluations(self, survey) -> None:
         """Run class evaluation methods.
 
         Runs all methods listed in `evaluations` class attribute and
@@ -285,7 +298,7 @@ class GenericCrawler:
                 self.__class__.__name__,
                 self.id,
             )
-            self.evaluate(evaluation=evaluation)
+            self.evaluate(evaluation=evaluation, survey=survey)
 
     def _build_metadata(
         self, metadata: dict[str, Any] | list[Any] | Any, path: str = ''

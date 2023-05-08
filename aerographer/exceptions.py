@@ -55,6 +55,10 @@ class EvaluationMethodNameError(Exception):
     """Invalid evaluation function name encountered."""
 
 
+class EvaluationMethodInputError(Exception):
+    """Invalid evaluation function inputs."""
+
+
 class EvaluationMethodResultOutputError(Exception):
     """Invalid evaluation function output type."""
 

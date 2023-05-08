@@ -756,7 +756,9 @@ class Survey(Freezable):
             if resource_type in service.resource_types:
                 return service.get_resource_type(resource_type)
         else:
-            raise SurveyAttributeError(f'Survey does not contain "{id}" resource type.')
+            raise SurveyAttributeError(
+                f'Survey does not contain "{resource_type}" resource type.'
+            )
 
     def get_resources(self) -> SurveySearch:
         """Get all resources.

@@ -282,6 +282,7 @@ class Crawler:
         RETURN_COLLECTION: dict[str, Any] = {}  # pylint: disable=invalid-name
 
         # TODO: this needs rework as it does not strip unrequested resources from return collection. use kms.key_rotation to observe.
+        # this needs to return evaluation includes, but not internal includes.
         for crawler in self.crawlers:
             if crawler.serviceType not in RETURN_COLLECTION:
                 RETURN_COLLECTION[crawler.serviceType] = {}
@@ -290,19 +291,34 @@ class Crawler:
                 crawler.serviceType
             ][crawler.resourceName]
 
-            for resource in RETURN_COLLECTION[crawler.serviceType][
-                crawler.resourceName
-            ].values():
-                resource.run_evaluations()
+            # for resource in RETURN_COLLECTION[crawler.serviceType][
+            #     crawler.resourceName
+            # ].values():
+            #     resource.run_evaluations(scan_results)
 
         for service, resources in RETURN_COLLECTION.items():
             SURVEY._add_service(service=service)
+            s = SURVEY.get_service(service)
             for resource, assets in resources.items():
-                s = SURVEY.get_service(service)
                 s._add_resource_type(resource_type=resource)
                 r = s.get_resource_type(resource_type=resource)
                 for asset in assets.values():
                     r._add_resource(asset)
+
+        # TODO: can this be done a better way?!
+        # evaluations should only be run on requested resources, not included resources (both evaluation and internal includes).
+        internal_survey = Survey()
+        for service, resources in scan_results.items():
+            internal_survey._add_service(service=service)
+            s = internal_survey.get_service(service)
+            for resource, assets in resources.items():
+                s._add_resource_type(resource_type=resource)
+                r = s.get_resource_type(resource_type=resource)
+                for asset in assets.values():
+                    r._add_resource(asset)
+
+        for resource in SURVEY.get_resources():
+            resource.run_evaluations(internal_survey)
 
         SURVEY._publish()
         return SURVEY
